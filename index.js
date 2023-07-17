@@ -1,6 +1,6 @@
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const fs = require("fs");
-const jsonFile = "./servers_info.js";
+const jsonFile = "./servers_info.json";
 
 require('dotenv').config();
 
@@ -47,6 +47,7 @@ client.on("guildCreate", (guild) => {
     fs.writeFileSync(jsonFile, JSON.stringify(jsonData));
   });
   
+
 
 // running the bot
 client.login(process.env.TOKEN);
