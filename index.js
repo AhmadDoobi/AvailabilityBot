@@ -1,8 +1,10 @@
-const { Client, Events, GatewayIntentBits } = require('discord.js');
+require('dotenv').config();
+const { Client, Events, GatewayIntentBits, REST } = require('discord.js');
 const fs = require("fs");
 const jsonFile = "./servers_info.json";
+const clientId = process.env.CLIENT_ID;
+const token = process.env.TOKEN;
 
-require('dotenv').config();
 
 // set the intetns for the bot
 const client = new Client({ intents: [
@@ -31,6 +33,7 @@ client.once(Events.ClientReady, c => {
 
     // Write the JSON file
     fs.writeFileSync(jsonFile, JSON.stringify(jsonData));
+  
 });
 
 client.on("guildCreate", (guild) => {
@@ -45,9 +48,8 @@ client.on("guildCreate", (guild) => {
   
     // Write the JSON file
     fs.writeFileSync(jsonFile, JSON.stringify(jsonData));
-  });
+});
   
-
-
+  
 // running the bot
-client.login(process.env.TOKEN);
+client.login(token);
