@@ -1,10 +1,10 @@
 require('dotenv').config();
-const { Client, Events, GatewayIntentBits, REST } = require('discord.js');
+const { Client, Events, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require("fs");
+const path = require('node:path');
 const jsonFile = "./servers_info.json";
 const clientId = process.env.CLIENT_ID;
 const token = process.env.TOKEN;
-
 
 // set the intetns for the bot
 const client = new Client({ intents: [
@@ -14,6 +14,25 @@ const client = new Client({ intents: [
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.MessageContent,
 ]});
+
+client.commands = new Collection();
+const foldersPath = path.join(__dirname, 'commands');
+const commandFolders = fs.readdirSync(foldersPath);
+
+for (const folder of commandFolders) {
+	const commandsPath = path.join(foldersPath, folder);
+	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+	for (const file of commandFiles) {
+		const filePath = path.join(commandsPath, file);
+		const command = require(filePath);
+		// Set a new item in the Collection with the key as the command name and the value as the exported module
+		if ('data' in command && 'execute' in command) {
+			client.commands.set(command.data.name, command);
+		} else {
+			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+		}
+	}
+}
 
 client.once(Events.ClientReady, c => {
 	console.log(`your bot is online! Logged in as ${c.user.tag}`);
@@ -30,7 +49,6 @@ client.once(Events.ClientReady, c => {
         jsonData[serverId] = {};
     }
     }
-
     // Write the JSON file
     fs.writeFileSync(jsonFile, JSON.stringify(jsonData));
   
@@ -49,7 +67,11 @@ client.on("guildCreate", (guild) => {
     // Write the JSON file
     fs.writeFileSync(jsonFile, JSON.stringify(jsonData));
 });
-  
+
+client.on(Events.InteractionCreate, interaction => {
+	if (!interaction.isChatInputCommand()) return;
+	console.log(interaction);
+});
   
 // running the bot
 client.login(token);
