@@ -1,9 +1,9 @@
-require('dotenv').config();
+const dotenv = require("dotenv");
+dotenv.config();
 const { Client, Events, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require("node:fs");
 const path = require('node:path');
 const jsonFile = "./servers_info.json";
-const clientId = process.env.CLIENT_ID;
 const token = process.env.TOKEN;
 
 // set the intetns for the bot
@@ -13,6 +13,7 @@ const client = new Client({ intents: [
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessageTyping,
 ]});
 
 client.commands = new Collection();
@@ -70,7 +71,6 @@ client.on("guildCreate", (guild) => {
 
 client.on(Events.InteractionCreate, interaction => {
 	if (!interaction.isChatInputCommand()) return;
-	console.log(interaction);
 });
   
 // running the bot
