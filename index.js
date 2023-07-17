@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { Client, Events, GatewayIntentBits, Collection } = require('discord.js');
-const fs = require("fs");
+const fs = require("node:fs");
 const path = require('node:path');
 const jsonFile = "./servers_info.json";
 const clientId = process.env.CLIENT_ID;
