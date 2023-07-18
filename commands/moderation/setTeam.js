@@ -62,7 +62,7 @@ module.exports = {
                 'coCaptain': coCaptainRoleName,
             }
         };
-        fs.writeFileSync(jsonFile, JSON.stringify(jsonData));
+        fs.writeFileSync(jsonFile, JSON.stringify(jsonData, null, 2));
         
         await interaction.reply({content: `The game name has been set to "${gameName}", team name set to "${teamName}", captain role set to "${captainRoleName}" and the co-captain role was set to "${coCaptainRoleName}".`, ephemeral: true});
     },
