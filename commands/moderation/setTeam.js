@@ -43,7 +43,7 @@ module.exports = {
         const captainRole = interaction.guild.roles.cache.find(role => role.name === captainRoleName);
         if (!captainRole) {
             await interaction.reply({content: "The captain role was not found.", ephemeral: true});
-              eturn;
+              return;
         }
         
         // Check if the co-captain role exists
