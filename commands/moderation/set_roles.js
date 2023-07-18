@@ -8,33 +8,35 @@ module.exports = {
         .addStringOption(option =>
             option
                 .setName('captain_role')
-                .setDescription('the captian role name')
+                .setDescription('the captain role name')
                 .setRequired(true))
         .addStringOption(option =>
             option
                 .setName('co-captain_role')
-                .setDescription('co-captian role name')
+                .setDescription('co-captain role name')
                 .setRequired(true)),
 
      
     async execute(interaction) {
+        console.log("exucted command a")
+        await interaction.reply("proccesing");
         // Get the captain role ID
-        const captainRoleID = interaction.options.getString('captain_role');
+        const captainRoleName = interaction.options.getString('captain_role');
         
         // Get the co-captain role ID
-        const coCaptainRoleID = interaction.options.getString('co-captain_role');
+        const coCaptainRoleName = interaction.options.getString('co-captain_role');
         
         // Check if the captain role exists
-        const captainRole = interaction.guild.roles.cache.find((role) => role.id === captainRoleID);
+        const captainRole = guild.roles.cache.find((role) => role === captainRoleName);
         if (!captainRole) {
-            await interaction.reply("The captain role was not found.");
+            await interaction.editReply("The captain role was not found.");
               eturn;
         }
         
         // Check if the co-captain role exists
-        const coCaptainRole = interaction.guild.roles.cache.find((role) => role.id === coCaptainRoleID);
+        const coCaptainRole = guild.roles.cache.find((role) => role === coCaptainRoleName);
         if (!coCaptainRole) {
-            await interaction.reply("The co-captain role was not found.");
+            await interaction.editReply("The co-captain role was not found.");
             return;
         }
         
@@ -42,12 +44,12 @@ module.exports = {
         const jsonFile = path.join(__dirname, 'servers_info.json');
         const jsonData = JSON.parse(fs.readFileSync(jsonFile));
         jsonData[interaction.guild.id] = {
-            'captain': captainRoleID,
-            'coCaptain': coCaptainRoleID,
+            'captain': captainRoleName,
+            'coCaptain': coCaptainRoleName,
         };
         fs.writeFileSync(jsonFile, JSON.stringify(jsonData));
         
-        await interaction.reply("The captain and co-captain roles have been set.");
-    }
+        await interaction.editReply("The captain and co-captain roles have been set.");
+    },
 };
 
