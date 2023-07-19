@@ -1,5 +1,4 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
-const path = require('node:path');
 const fs = require("node:fs");
 const jsonFile = "./servers_info.json";
 
@@ -11,8 +10,12 @@ module.exports = {
         .addStringOption(option =>
             option
                 .setName('game_name')
-                .setDescription('type the full game name ex: "pavlov shack" ')
-                .setRequired(true))
+                .setDescription('chose the game name ex: "pavlov shack" ')
+                .setRequired(true)
+                .addChoices(
+                    {name: 'pavlov-shack', value: 'pavlov-shack'},
+                    {name: 'breachers', value: 'breachers'},     
+                ))
         .addStringOption(option =>
             option
                 .setName('team_name')
@@ -28,17 +31,23 @@ module.exports = {
                 .setName('co-captain_role')
                 .setDescription('type the co-captain role name')
                 .setRequired(true)),
-
      
     async execute(interaction) {
+        // read the json file data
+        const jsonData = JSON.parse(fs.readFileSync(jsonFile));
         // Get the game name 
         const gameName = interaction.options.getString('game_name')
         // Get the team name 
         const teamName = interaction.options.getString('team_name')
-        // Get the captain role ID
+        // Get the captain role 
         const captainRoleName = interaction.options.getString('captain_role')
-        // Get the co-captain role ID
+        // Get the co-captain role 
         const coCaptainRoleName = interaction.options.getString('co-captain_role');
+        // check if the team name already exists, and if the command is being invoked from the same server the team was set on
+        if (jsonData[gameName].hasOwnProperty(teamName) && interaction.guild.id != jsonData[gameName][teamName]["guild_id"]) {
+            await interaction.reply({content: 'the team name you tried to set is already connected to another server. \nif you think this is a mistake please contact <a7a_.>', ephemeral: true});
+            return
+        }
         // Check if the captain role exists
         const captainRole = interaction.guild.roles.cache.find(role => role.name === captainRoleName);
         if (!captainRole) {
@@ -54,17 +63,14 @@ module.exports = {
         }
         
         // Add the roles IDs to the JSON file
-        const jsonData = JSON.parse(fs.readFileSync(jsonFile));
-        jsonData[interaction.guild.id] = { 
-            [gameName]: {
-                'team': teamName,
-                'captain': captainRoleName,
-                'coCaptain': coCaptainRoleName,
-            }
+        jsonData[gameName][teamName] = {
+                'guild_id': interaction.guild.id, 
+                'captain_role': captainRole.id,
+                'coCaptain_role': coCaptainRole.id,
         };
         fs.writeFileSync(jsonFile, JSON.stringify(jsonData, null, 2));
         
-        await interaction.reply({content: `The game name has been set to "${gameName}", team name set to "${teamName}", captain role set to "${captainRoleName}" and the co-captain role was set to "${coCaptainRoleName}".`, ephemeral: true});
+        await interaction.reply({content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain role set to "${captainRoleName}",\nand the co-captain role was set to "${coCaptainRoleName}".` , ephemeral: true});
     },
 };
 
