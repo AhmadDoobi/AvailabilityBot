@@ -13,9 +13,8 @@ const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
-	// Exclude the "botAdmin" folder
 	if (folder === "botAdmin") {
-        // Grab all the command files from the commands directory
+        // Grab all the command files from the botAdmin directory
 	    const commandsPath = path.join(foldersPath, folder);
 	    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 	

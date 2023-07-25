@@ -1,9 +1,11 @@
 const dotenv = require("dotenv");
 dotenv.config();
-const { Client, Events, GatewayIntentBits, Collection } = require('discord.js');
+const sqlite3 = require('sqlite3').verbose();
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require("node:fs");
 const path = require('node:path');
 const token = process.env.TOKEN;
+const infoDb = new sqlite3.Database('info.db');
 
 // set the intetns for the bot
 const client = new Client({ intents: [

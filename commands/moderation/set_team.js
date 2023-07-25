@@ -1,76 +1,143 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
-const fs = require("node:fs");
-const jsonFile = "./servers_info.json";
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('info.db', (err) => {
+  if (err) {
+    console.error('Error opening database:', err.message);
+  } else {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS teams (
+        guild_id TEXT PRIMARY KEY,
+        game_name TEXT NOT NULL,
+        team_name TEXT NOT NULL,
+        captain_userId TEXT NOT NULL,
+        coCaptain_userId TEXT NOT NULL,
+        captain_username TEXT NOT NULL,
+        coCaptain_username TEXT NOT NULL
+      );
+    `);
+  }
+});
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('set_team')
-        .setDescription('register the game name, team name and the captin and co-captian roles')
+        .setDescription('register the game name, team name and the captin and co-captian usernames and roles')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setDMPermission(false)
         .addStringOption(option =>
             option
                 .setName('game_name')
-                .setDescription('chose the game name ex: "pavlov shack" ')
+                .setDescription('chose the game name')
                 .setRequired(true)
                 .addChoices(
                     {name: 'pavlov-shack', value: 'pavlov-shack'},
-                    {name: 'breachers', value: 'breachers'},     
+                    {name: 'breachers', value: 'breachers'},
+                    {name: 'pavlov-pc', value: 'pavlov-pc'},     
                 ))
         .addStringOption(option =>
             option
                 .setName('team_name')
                 .setDescription('type the full team name')
                 .setRequired(true))
-        .addStringOption(option =>
+        .addUserOption(option =>
             option
-                .setName('captain_role')
-                .setDescription('type the captain role name')
+                .setName('captain')
+                .setDescription('set the team captain')
                 .setRequired(true))
-        .addStringOption(option =>
+        .addUserOption(option =>
             option
-                .setName('co-captain_role')
-                .setDescription('type the co-captain role name')
+                .setName('co-captain')
+                .setDescription('set the team co-captain')
                 .setRequired(true)),
      
     async execute(interaction) {
-        // read the json file data
-        const jsonData = JSON.parse(fs.readFileSync(jsonFile));
         // Get the game name 
-        const gameName = interaction.options.getString('game_name')
+        const gameName = interaction.options.getString('game_name');
         // Get the team name 
-        const teamName = interaction.options.getString('team_name')
-        // Get the captain role 
-        const captainRoleName = interaction.options.getString('captain_role')
-        // Get the co-captain role 
-        const coCaptainRoleName = interaction.options.getString('co-captain_role');
-        // check if the team name already exists, and if the command is being invoked from the same server the team was set on
-        if (jsonData[gameName].hasOwnProperty(teamName) && interaction.guild.id != jsonData[gameName][teamName]["guild_id"]) {
-            await interaction.reply({content: 'the team name you tried to set is already connected to another server. \nif you think this is a mistake please contact <a7a_.>', ephemeral: true});
-            return
-        }
-        // Check if the captain role exists
-        const captainRole = interaction.guild.roles.cache.find(role => role.name === captainRoleName);
-        if (!captainRole) {
-            await interaction.reply({content: "The captain role was not found.", ephemeral: true});
-              return;
-        }
+        const teamName = interaction.options.getString('team_name');
+        // Get the captain username
+        const captainUser = interaction.options.getUser('captain');
+        // Get the co-captain username 
+        const coCaptainUser = interaction.options.getUser('co-captain')
+        //Get the captain user id
+        const captainUserId = captainUser.id;
+        // Get the co-captain user id 
+        const coCaptainUserId = coCaptainUser.id;
+        // Get the captain username
+        const captainUsername = captainUser.username;
+        // Get the co-captain username
+        const coCaptainUsername = coCaptainUser.username;
+        // Get the guild id 
+        const guildId = interaction.guild.id;
         
-        // Check if the co-captain role exists
-        const coCaptainRole = interaction.guild.roles.cache.find(role => role.name === coCaptainRoleName);
-        if (!coCaptainRole) {
-            await interaction.reply({content: "The co-captain role was not found.", ephemeral: true});
+        // check if the team name already exists
+        async function checkIfTeamAlreadyExists(gameName, teamName, guildId) {
+            const selectQuery = `
+              SELECT guild_id
+              FROM teams
+              WHERE game_name = ? AND team_name = ?;
+            `;
+          
+            return new Promise((resolve, reject) => {
+              db.get(selectQuery, [gameName, teamName], (err, row) => {
+                if (err) {
+                  reject(err);
+                } else if (row) {
+                  const teamGuildId = row.guild_id;
+                  if (guildId !== teamGuildId) {
+                    resolve(true); // Team name is associated with another server
+                  } else {
+                    resolve(false); // Team name is associated with the same server
+                  }
+                } else {
+                  resolve(false); // Team name does not exist in the database
+                }
+              });
+            });
+        }
+        // Check if the guild already has a team for the specified game
+        async function checkIfGuildHasTeamForGame(guildId, gameName) {
+            const selectQuery = `
+              SELECT team_name
+              FROM teams
+              WHERE guild_id = ? AND game_name = ?;
+            `;
+          
+            return new Promise((resolve, reject) => {
+              db.all(selectQuery, [guildId, gameName], (err, rows) => {
+                if (err) {
+                  reject(err);
+                } else if (rows && rows.length > 0) {
+                  resolve(rows); // Guild already has teams for the given game
+                } else {
+                  resolve(null); // Guild does not have any teams for the given game
+                }
+              });
+            });
+        }
+        const teamExistsOnAnotherServer = await checkIfTeamAlreadyExists(gameName, teamName, guildId);
+        if (teamExistsOnAnotherServer) {
+            await interaction.reply({ content: 'The team name you tried to set is already connected to another server. \nif you think this is a mistake please contact <a7a_.>', ephemeral: true });
+            return;
+        }
+        const guildHasTeamForGame = await checkIfGuildHasTeamForGame(guildId, gameName);
+        if (guildHasTeamForGame) {
+            await interaction.reply({ content: 'Only one team is available per game for each server.\nif you wish to change your current team info please contact <a7a_.>.', ephemeral: true });
             return;
         }
         
-        // Add the roles IDs to the JSON file
-        jsonData[gameName][teamName] = {
-                'guild_id': interaction.guild.id, 
-                'captain_role': captainRole.id,
-                'coCaptain_role': coCaptainRole.id,
-        };
-        fs.writeFileSync(jsonFile, JSON.stringify(jsonData, null, 2));
-        
-        await interaction.reply({content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain role set to "${captainRoleName}",\nand the co-captain role was set to "${coCaptainRoleName}".` , ephemeral: true});
+        const insertQuery = `
+            INSERT INTO teams (guild_id, game_name, team_name, captain_userId, coCaptain_userId, captain_username, coCaptain_username)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        `;
+
+        db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername], function(err) {
+            if (err) {
+                console.error('Error inserting team:', err.message);
+                return
+            } 
+        });
+        await interaction.reply({content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".` , ephemeral: true});
     },
 };
 

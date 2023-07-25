@@ -1,3 +1,4 @@
 dotenv
 .env
-servers_info.json
+info.db
+test.js
