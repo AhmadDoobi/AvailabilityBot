@@ -2,12 +2,12 @@ const { SlashCommandBuilder, PermissionFlagsBits, Client} = require('discord.js'
 const fs = require('fs');
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
-const { reloadTeamsAndGamesCommands } = require("../../handlers/reloadCommands");
+const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-commands");
 
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('add_game')
+        .setName('add-game')
         .setDescription('adds a game to the games file')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addStringOption(option =>
@@ -27,7 +27,10 @@ module.exports = {
             console.log(`there was an error: ${error}`)
             return;
         }
-        await interaction.reply(`game ${gameName}, successfully added to the games file!.`)
+        await interaction.reply({
+            content: `game ${gameName}, successfully added to the games file, and commands were reloaded.`, 
+            ephemeral: true
+        })
     
     }
 }

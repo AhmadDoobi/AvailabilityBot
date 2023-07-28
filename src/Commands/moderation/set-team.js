@@ -1,11 +1,11 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
-let teamsFile = fs.readFileSync('teams.json');
+let teamsFile = fs.readFileSync('teams.json', 'utf8');
 let teams = JSON.parse(teamsFile);
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
-const { reloadTeamsAndGamesCommands } = require("../../handlers/reloadCommands");
+const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-commands");
 const db = new sqlite3.Database('info.db', (err) => {
   if (err) {
     console.error('Error opening database:', err.message);
@@ -26,8 +26,8 @@ const db = new sqlite3.Database('info.db', (err) => {
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('set_team')
-        .setDescription('register the game name, team name and the captin and co-captian usernames and roles')
+        .setName('set-team')
+        .setDescription('register your team')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false)
         .addStringOption(option =>
@@ -118,12 +118,16 @@ module.exports = {
         }
         const teamExistsOnAnotherServer = await checkIfTeamAlreadyExists(gameName, teamName, guildId);
         if (teamExistsOnAnotherServer) {
-            await interaction.reply({ content: 'The team name you tried to set is already connected to another server. \nif you think this is a mistake please contact <a7a_.>', ephemeral: true });
+            await interaction.reply({ 
+              content: 'The team name you tried to set is already connected to another server. \nif you think this is a mistake please contact <a7a_.>', 
+              ephemeral: true });
             return;
         }
         const guildHasTeamForGame = await checkIfGuildHasTeamForGame(guildId, gameName);
         if (guildHasTeamForGame) {
-            await interaction.reply({ content: 'Only one team is available per game for each server.\nif you wish to change your current team info please contact <a7a_.>.', ephemeral: true });
+            await interaction.reply({ 
+              content: 'Only one team is available per game for each server.\nif you wish to change your current team info and you are the captain or co-captain of the team use </reset-team-info>.\n otherwise contact <a7a_.>. ',
+              ephemeral: true });
             return;
         }
         
@@ -131,10 +135,18 @@ module.exports = {
           // Prepare the team object
           let teamObject = {"name": teamName, "value": teamName};
 
-          // Add the team to the game
-          teams[gameName].push(teamObject);
+          // Check if the team already exists
+          let teamExists = teams.some(team => team.name === teamName);
 
-          fs.writeFileSync('teams.json', JSON.stringify(teams, null, 2));
+          if (!teamExists) {
+            // Add the team to the game
+            teams.push(teamObject);
+
+            fs.writeFileSync('teams.json', JSON.stringify(teams, null, 2));
+          } else {
+              console.log(`set team: team ${teamName}, already exists in the json file`);
+            }
+
 
           const insertQuery = `
               INSERT INTO teams (guild_id, game_name, team_name, captain_userId, coCaptain_userId, captain_username, coCaptain_username)
@@ -152,7 +164,10 @@ module.exports = {
           console.log(`there was an error: ${error}`)
           return
         }
-        await interaction.reply({content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".` , ephemeral: true});
+        await interaction.reply({
+          content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".`, 
+          ephemeral: true
+        });
     },
 };
 

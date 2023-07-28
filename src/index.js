@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const token = process.env.TOKEN;
-const { loadEvents } = require("./handlers/eventHandler");
+const { loadEvents } = require("./Handlers/event-handler");
 // set the intetns for the bot
 const client = new Client({ intents: [
     GatewayIntentBits.Guilds,

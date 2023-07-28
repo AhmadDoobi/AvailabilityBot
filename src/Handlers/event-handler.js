@@ -1,4 +1,4 @@
-const { loadFiles } = require('../functions/filesLoader');
+const { loadFiles } = require('../Functions/files-loader');
 
 async function loadEvents(client) {
     console.time("Events Loaded");
@@ -6,7 +6,7 @@ async function loadEvents(client) {
     client.events = new Map();
     const events = new Array();
 
-    const files = await loadFiles('events');
+    const files = await loadFiles('Events');
     for (const file of files) {
         try {
             const event = require(file);

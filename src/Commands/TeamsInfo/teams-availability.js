@@ -3,6 +3,6 @@ const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('team_availability')
+        .setName('team-availability')
         .setDescription('displays teams availability')
 };
