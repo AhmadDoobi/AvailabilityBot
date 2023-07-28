@@ -36,13 +36,18 @@ module.exports = {
 			return interaction.reply(`There is no command with name \`${commandName}\`!`);
 		}
 
-		delete require.cache[require.resolve(`../${commandCategory}/${command.data.name}.js`)];
-
+		try{
+			delete require.cache[require.resolve(`../${commandCategory}/${commandName}.js`)];
+			console.log('deleted command cache');
+		} catch (error) {
+			console.log("there was an error deleting the command cache ")
+		}
 		try {
 	        interaction.client.commands.delete(command.data.name);
-	        const newCommand = require(`../${commandCategory}/${command.data.name}.js`);
+	        const newCommand = require(`../${commandCategory}/${commandName}.js`);
 	        interaction.client.commands.set(newCommand.data.name, newCommand);
 	        await interaction.reply(`Command \`${newCommand.data.name}\` was reloaded!`);
+			console.log(`Command \`${newCommand.data.name}\` was reloaded!`)
 		} catch (error) {
 	        console.error(error);
 	        await interaction.reply(`There was an error while reloading a command \`${command.data.name}\`:\n\`${error.message}\``);

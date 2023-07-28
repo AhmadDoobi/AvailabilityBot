@@ -1,4 +1,6 @@
-dotenv
 .env
 info.db
 test.js
+games.json
+teams.json
+trash
