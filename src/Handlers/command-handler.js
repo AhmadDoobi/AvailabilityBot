@@ -13,6 +13,10 @@ async function loadCommands(client) {
 
     files.forEach((file) => {
         const command = require(file);
+        if(!command.data){
+            console.log(`❌❌❌ There is no data in file: ${file}!`);
+            return;
+        };
         const folder = path.basename(path.dirname(file));
         command.category = folder;
         client.commands.set(command.data.name, command);

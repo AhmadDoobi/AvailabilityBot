@@ -5,6 +5,7 @@ const token = process.env.TOKEN;
 const { loadEvents } = require("./Handlers/event-handler");
 // set the intetns for the bot
 const client = new Client({ intents: [
+    GatewayIntentBits.DirectMessages,
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,

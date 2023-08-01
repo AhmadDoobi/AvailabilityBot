@@ -1,25 +1,28 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
-let teamsFile = fs.readFileSync('teams.json', 'utf8');
-let teams = JSON.parse(teamsFile);
+const { resolve } = require("path");
+let teamsJson = JSON.parse(fs.readFileSync('teams.json', 'utf8'));
+let teams = teamsJson.teams;
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
-const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-commands");
+const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-global-commands");
 const db = new sqlite3.Database('info.db', (err) => {
   if (err) {
     console.error('Error opening database:', err.message);
   } else {
     db.run(`
       CREATE TABLE IF NOT EXISTS teams (
-        guild_id TEXT PRIMARY KEY,
+        guild_id TEXT NOT NULL,
         game_name TEXT NOT NULL,
         team_name TEXT NOT NULL,
         captain_userId TEXT NOT NULL,
         coCaptain_userId TEXT NOT NULL,
         captain_username TEXT NOT NULL,
-        coCaptain_username TEXT NOT NULL
+        coCaptain_username TEXT NOT NULL,
+        PRIMARY KEY (team_name, game_name)
       );
+  
     `);
   }
 });
@@ -59,7 +62,7 @@ module.exports = {
         // Get the captain username
         const captainUser = interaction.options.getUser('captain');
         // Get the co-captain username 
-        const coCaptainUser = interaction.options.getUser('co-captain')
+        const coCaptainUser = interaction.options.getUser('co-captain');
         //Get the captain user id
         const captainUserId = captainUser.id;
         // Get the co-captain user id 
@@ -141,28 +144,54 @@ module.exports = {
           if (!teamExists) {
             // Add the team to the game
             teams.push(teamObject);
-
-            fs.writeFileSync('teams.json', JSON.stringify(teams, null, 2));
+            teamsJson["games per team name"][teamName] = 1;
+            
           } else {
-              console.log(`set team: team ${teamName}, already exists in the json file`);
-            }
-
+            teamsJson["games per team name"][teamName]++;            
+          }
+          fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
 
           const insertQuery = `
               INSERT INTO teams (guild_id, game_name, team_name, captain_userId, coCaptain_userId, captain_username, coCaptain_username)
               VALUES (?, ?, ?, ?, ?, ?, ?);
           `;
 
-          db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername], function(err) {
-              if (err) {
-                  console.error('Error inserting team:', err.message);
-                  return
-              } 
+          try {
+            await new Promise((resolve, reject) => {
+                db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername], function(err) {
+                    if (err) {
+                        console.error('Error inserting team:', err.message);
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
+          } catch (error) {
+          console.log(`there was an error adding a team, ${error}`)
+          await interaction.reply({
+            content: 'There was an error processing your request. Please try again. \nif this problem keeps happening please contact <a7a_.>',
+            ephemeral: true
           });
-            reloadTeamsAndGamesCommands(client)
+          return;
+        }
+          try {
+            await reloadTeamsAndGamesCommands(client)           
+          } catch(error){
+            console.log(error)
+            await interaction.reply({
+              content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".\n❌❌❌ there was an error reloading the commands, please contact <a7a_.>.`,
+              ephemeral: true 
+            });
+            return;
+          }
         } catch(error) {
           console.log(`there was an error: ${error}`)
-          return
+          await interaction.reply({
+          content: "something went wrong. please try again. \nif this problem keeps happening please contact <a7a_.>",
+          ephemeral: true
+          });
+          return;
         }
         await interaction.reply({
           content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".`, 

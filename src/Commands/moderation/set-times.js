@@ -1,14 +1,13 @@
 const { SlashCommandBuilder } = require("discord.js");
 const fs = require('fs');
-let teamsFile = fs.readFileSync('teams.json');
-let teams = JSON.parse(teamsFile);
-const games = fs.readFileSync('games.json', 'utf8');
-const gameChoices = JSON.parse(games);
+let teams = JSON.parse(fs.readFileSync('teams.json', 'utf8')).teams;
+const gamesFile = fs.readFileSync('games.json', 'utf8');
+const gameChoices = JSON.parse(gamesFile);
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('set-times')
-        .setDescription('register the days and times you want to add for your team members')
+        .setDescription('register the days and times you want to add for your team members to chick their availability in')
         .setDMPermission(false)
         .addStringOption(option =>
             option
@@ -20,7 +19,7 @@ module.exports = {
             option
                 .setName('team')
                 .setDescription('select your team')
-                .addChoices(...gameChoices)
+                .addChoices(...teams)
                 .setRequired(true))
         .addChannelOption(option =>
             option

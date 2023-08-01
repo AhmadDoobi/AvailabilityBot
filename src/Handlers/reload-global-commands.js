@@ -7,7 +7,7 @@ async function reloadTeamsAndGamesCommands(client) {
     const path = require('node:path');
 
     for (const [commandName, command] of client.commands.entries()) {
-        if (command.category === 'BotAdmin' && commandName === 'reset-teams') {
+        if (command.category === 'BotAdmin' && commandName === 'delete-team') {
             client.commands.delete(commandName);
         }
         else if(command.category !== 'BotAdmin') {
@@ -22,13 +22,16 @@ async function reloadTeamsAndGamesCommands(client) {
 
     files.forEach((file) => {
         const command = require(file);
+        if(!command.data){
+            console.log(`❌❌❌ There is no data in file: ${file}!`);
+            return;
+        };
         const folder = path.basename(path.dirname(file));
         command.category = folder;
         client.commands.set(command.data.name, command);
 
-        // Check if command file is in 'botAdmin' directory
         if (file.includes('BotAdmin')) {
-            if ('data' in command && 'execute' in command) {
+            if ('data' in command && 'execute' in command && file.includes('delete-team.js')) {
                 adminCommandsArray.push(command.data.toJSON());
                 table.addRow(command.data.name, "Admin", "✅");
             } else {

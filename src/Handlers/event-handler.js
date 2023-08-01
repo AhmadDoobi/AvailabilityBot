@@ -1,10 +1,12 @@
 const { loadFiles } = require('../Functions/files-loader');
 
+
 async function loadEvents(client) {
     console.time("Events Loaded");
 
     client.events = new Map();
-    const events = new Array();
+    const ascii = require("ascii-table");
+    const table = new ascii().setHeading("Events", "Status");
 
     const files = await loadFiles('Events');
     for (const file of files) {
@@ -15,16 +17,13 @@ async function loadEvents(client) {
 
             target[event.once ? "once" : "on"](event.name, execute);
             client.events.set(event.name, execute);
-
-            events.push({ Event: event.name, Status: "✅" });
+            table.addRow(event.name, "✅" );
         } catch (error) {
-            events.push({ Event: file.split("/").pop().slice(0, -3), Status: "🔴" });
+            table.addRow(event.name,  "🔴");
         }
     }
 
-    console.table(events, ["Event", "Status"]);
-    console.info("\n\x1b[36m%s\x1b[0m", "Loaded Events.");
-    console.timeEnd("Events Loaded");
+    return console.log(table.toString(), "\nEvents Loaded")
 }
 
 module.exports = { loadEvents }
