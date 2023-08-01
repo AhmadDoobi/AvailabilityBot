@@ -1,7 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
-const { resolve } = require("path");
 let teamsJson = JSON.parse(fs.readFileSync('teams.json', 'utf8'));
 let teams = teamsJson.teams;
 const games = fs.readFileSync('games.json', 'utf8');
@@ -180,7 +179,7 @@ module.exports = {
           } catch(error){
             console.log(error)
             await interaction.reply({
-              content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".\n❌❌❌ there was an error reloading the commands, please contact <a7a_.>.`,
+              content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".\n❌❌❌ But there was an error reloading the commands, please contact <a7a_.>.`,
               ephemeral: true 
             });
             return;

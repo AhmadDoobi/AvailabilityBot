@@ -192,7 +192,17 @@ module.exports = {
         };
 
         if(teamNameUpdated || captainUpdated || coCaptainUpdated) {
-            await interaction.reply({
+            try {
+                await reloadTeamsAndGamesCommands(client)           
+              } catch(error){
+                console.log(error)
+                await interaction.reply({
+                  content: `${teamNameUpdated}, \n${captainUpdated}, \n${coCaptainUpdated}.\n❌❌❌ But there was an error reloading the commands, please contact <a7a_.>.`,
+                  ephemeral: true 
+                });
+                return;
+              }
+              await interaction.reply({
                 content: `${teamNameUpdated}, \n${captainUpdated}, \n${coCaptainUpdated}.`,
                 ephemeral: true
             });

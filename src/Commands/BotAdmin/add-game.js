@@ -30,7 +30,16 @@ module.exports = {
         try{
             gameChoices.push(gameObject)
             fs.writeFileSync('games.json', JSON.stringify(gameChoices, null, 2));
-            reloadTeamsAndGamesCommands(client)
+            try {
+                await reloadTeamsAndGamesCommands(client)           
+              } catch(error){
+                console.log(error)
+                await interaction.reply({
+                  content: `game ${gameName}, successfully added to the games file, and commands were reloaded.\n❌❌❌ But there was an error reloading the commands.`,
+                  ephemeral: true 
+                });
+                return;
+              }
             await interaction.reply({
                 content: `game ${gameName}, successfully added to the games file, and commands were reloaded.`, 
                 ephemeral: true

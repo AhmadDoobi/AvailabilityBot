@@ -55,7 +55,16 @@ module.exports = {
                 teamsJson.teams = teamsJson.teams.filter(team => team.name !== teamName);
             }
             fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
-            reloadTeamsAndGamesCommands(client)
+            try {
+                await reloadTeamsAndGamesCommands(client)           
+              } catch(error){
+                console.log(error)
+                await interaction.reply({
+                  content: `successfully deleted team ${teamName}, from game ${gameName}.\n❌❌❌ But there was an error reloading the commands.`,
+                  ephemeral: true 
+                });
+                return;
+              }
             await interaction.reply({
                 content: `successfully deleted team ${teamName}, from game ${gameName}.`,
                 ephemeral: true
