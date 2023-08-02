@@ -2,8 +2,7 @@ const { SlashCommandBuilder, PermissionFlagsBits} = require('discord.js');
 const fs = require('fs');
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
-const { addGame } = require('../../Functions/add-game');
-const { deleteGame } = require('../../Functions/delete-game');
+const { addGame, deleteGame } = require('../../Functions/games-file-options.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
