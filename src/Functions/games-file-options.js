@@ -57,7 +57,7 @@ async function deleteGame(gameName, client) {
         console.error(`Error occurred while selecting team names: ${err}`);
         return err.message;
     }
-    console.log(teamNamesArray)
+
     let deleteQueryAvailability = `DELETE FROM availability WHERE game_name = ?`;
     let availabilityState;
     let teamsState;
