@@ -17,7 +17,6 @@ module.exports = {
         .setName('delete-team')
         .setDescription('reset team data in the json file')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-        .setDMPermission(false)
         .addStringOption(option =>
             option
                 .setName('game_name')
