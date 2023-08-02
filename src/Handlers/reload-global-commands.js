@@ -1,10 +1,9 @@
+const { globalCommandsFiles } = require("../Functions/global-commands-loader");
+const ascii = require("ascii-table");
+const path = require('node:path');
 
 async function reloadTeamsAndGamesCommands(client) {
-    
-    const { globalCommandsFiles } = require("../Functions/global-commands-loader");
-    const ascii = require("ascii-table");
     const table = new ascii().setHeading("commands", "type", "status");
-    const path = require('node:path');
 
     for (const [commandName, command] of client.commands.entries()) {
         if (command.category === 'BotAdmin' && commandName === 'delete-team') {

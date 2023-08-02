@@ -1,8 +1,10 @@
+const { loadFiles } = require("../Functions/files-loader");
+const ascii = require("ascii-table");
+const path = require('node:path');
+
 async function loadCommands(client) {
-    const { loadFiles } = require("../Functions/files-loader");
-    const ascii = require("ascii-table");
     const table = new ascii().setHeading("commands", "type", "status");
-    const path = require('node:path');
+
 
     await client.commands.clear();
     

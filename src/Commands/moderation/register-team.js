@@ -6,29 +6,17 @@ let teams = teamsJson.teams;
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
 const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-global-commands");
+const { checkIfTeamAlreadyExists } = require('../../Functions/check-if-team-exists');
+const { checkIfGuildHasTeamForGame } = require('../../Functions/check-if-guild-has-team');
 const db = new sqlite3.Database('info.db', (err) => {
   if (err) {
     console.error('Error opening database:', err.message);
-  } else {
-    db.run(`
-      CREATE TABLE IF NOT EXISTS teams (
-        guild_id TEXT NOT NULL,
-        game_name TEXT NOT NULL,
-        team_name TEXT NOT NULL,
-        captain_userId TEXT NOT NULL,
-        coCaptain_userId TEXT NOT NULL,
-        captain_username TEXT NOT NULL,
-        coCaptain_username TEXT NOT NULL,
-        PRIMARY KEY (team_name, game_name)
-      );
-  
-    `);
   }
 });
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('set-team')
+        .setName('register-team')
         .setDescription('register your team')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false)
@@ -73,51 +61,6 @@ module.exports = {
         // Get the guild id 
         const guildId = interaction.guild.id;
 
-        // check if the team name already exists
-        async function checkIfTeamAlreadyExists(gameName, teamName, guildId) {
-            const selectQuery = `
-              SELECT guild_id
-              FROM teams
-              WHERE game_name = ? AND team_name = ?;
-            `;
-          
-            return new Promise((resolve, reject) => {
-              db.get(selectQuery, [gameName, teamName], (err, row) => {
-                if (err) {
-                  reject(err);
-                } else if (row) {
-                  const teamGuildId = row.guild_id;
-                  if (guildId !== teamGuildId) {
-                    resolve(true); // Team name is associated with another server
-                  } else {
-                    resolve(false); // Team name is associated with the same server
-                  }
-                } else {
-                  resolve(false); // Team name does not exist in the database
-                }
-              });
-            });
-        }
-        // Check if the guild already has a team for the specified game
-        async function checkIfGuildHasTeamForGame(guildId, gameName) {
-            const selectQuery = `
-              SELECT team_name
-              FROM teams
-              WHERE guild_id = ? AND game_name = ?;
-            `;
-          
-            return new Promise((resolve, reject) => {
-              db.all(selectQuery, [guildId, gameName], (err, rows) => {
-                if (err) {
-                  reject(err);
-                } else if (rows && rows.length > 0) {
-                  resolve(rows); // Guild already has teams for the given game
-                } else {
-                  resolve(null); // Guild does not have any teams for the given game
-                }
-              });
-            });
-        }
         const teamExistsOnAnotherServer = await checkIfTeamAlreadyExists(gameName, teamName, guildId);
         if (teamExistsOnAnotherServer) {
             await interaction.reply({ 
