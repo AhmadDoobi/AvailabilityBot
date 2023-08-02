@@ -6,7 +6,7 @@ async function reloadTeamsAndGamesCommands(client) {
     const table = new ascii().setHeading("commands", "type", "status");
 
     for (const [commandName, command] of client.commands.entries()) {
-        if (command.category === 'BotAdmin' && commandName === 'delete-team') {
+        if (command.category === 'BotAdmin' && commandName === 'delete-team' || command.category === 'BotAdmin' && commandName === 'games-file') {
             client.commands.delete(commandName);
         }
         else if(command.category !== 'BotAdmin') {
@@ -30,7 +30,7 @@ async function reloadTeamsAndGamesCommands(client) {
         client.commands.set(command.data.name, command);
 
         if (file.includes('BotAdmin')) {
-            if ('data' in command && 'execute' in command && file.includes('delete-team.js')) {
+            if ('data' in command && 'execute' in command && file.includes('delete-team.js') || 'data' in command && 'execute' in command && file.includes('games-file.js')) {
                 adminCommandsArray.push(command.data.toJSON());
                 table.addRow(command.data.name, "Admin", "✅");
             } else {
