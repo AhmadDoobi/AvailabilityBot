@@ -47,7 +47,7 @@ module.exports = {
             option.setName('sunday').setDescription('select if you want sunday to be included').setRequired(true))
         .addIntegerOption(option =>
             option
-                .setName('from-hour')
+                .setName('from_hour')
                 .setDescription('the hour to start the check from')
                 .setRequired(true)
                 .addChoices(
@@ -56,7 +56,7 @@ module.exports = {
                 ))
         .addIntegerOption(option =>
             option
-                .setName('to-hour')
+                .setName('to_hour')
                 .setDescription('the hour to finish the check in')
                 .setRequired(true)
                 .addChoices(
@@ -65,12 +65,19 @@ module.exports = {
                 ))  
         .addRoleOption(option =>
             option
-                .setName('team-members-role')
+                .setName('team_members_role')
                 .setDescription('if you dont want the bot to ping the role leave empty')
                 .setRequired(false)),
     async execute(interaction) {
-        const gameName = interaction.options.getString('game_name')
-        const teamName = interaction.options.getString('team_name')
+        const gameName = interaction.options.getString('game_name');
+        const teamName = interaction.options.getString('team_name');
+        const eventsChannel = interaction.options.getChannel('channel').id;
+
+        if(interaction.options.getRole('team_members_role')){
+            const teamMemberRole = interaction.options.getRole('team_members_role');
+            
+        }
+
         const fromHour = interaction.options.getInteger('from-hour');
         const toHour = interaction.options.getInteger('to-hour');
         
