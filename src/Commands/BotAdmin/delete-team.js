@@ -11,6 +11,7 @@ const db = new sqlite3.Database('info.db', (err) => {
     }
 });
 const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-global-commands");
+const { deleteTeamAvailability } = require('../../Functions/delete-team-availability')
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -33,7 +34,7 @@ module.exports = {
     async execute(interaction, client){
         const gameName = interaction.options.getString('game_name');
         const teamName = interaction.options.getString('team_name');
-
+        let state;
         try {
             await new Promise((resolve, reject) => {
                 let deleteTeamQuery = `DELETE FROM teams WHERE team_name = ? AND game_name = ?`;
@@ -46,7 +47,7 @@ module.exports = {
                     }
                  });
             });
-
+            state = await deleteTeamAvailability(teamName, gameName)
             if(teamsJson['games per team name'][teamName] > 1) {
                 teamsJson['games per team name'][teamName]--;
             } else {
@@ -56,16 +57,16 @@ module.exports = {
             fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
             try {
                 await reloadTeamsAndGamesCommands(client)           
-              } catch(error){
+            } catch(error){
                 console.log(error)
                 await interaction.reply({
-                  content: `successfully deleted team ${teamName}, from game ${gameName}.\n❌❌❌ But there was an error reloading the commands.`,
+                  content: `successfully deleted team ${teamName}, from game ${gameName}.\n and ${state}\n❌❌❌ But there was an error reloading the commands.`,
                   ephemeral: true 
                 });
                 return;
-              }
+            }
             await interaction.reply({
-                content: `successfully deleted team ${teamName}, from game ${gameName}.`,
+                content: `successfully deleted team ${teamName}, from game ${gameName}.\n and ${state}`,
                 ephemeral: true
             });
         } catch (error) {
