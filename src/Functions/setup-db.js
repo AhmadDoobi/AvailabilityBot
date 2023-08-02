@@ -17,7 +17,8 @@ async function setupDatabase() {
                 coCaptain_userId TEXT NOT NULL,
                 captain_username TEXT NOT NULL,
                 coCaptain_username TEXT NOT NULL,
-                events_channel TEXT NIT NULL,
+                availability_measageId TEXT NOT NULL,
+                events_channelId TEXT NIT NULL,
                 teamMember_roleId TEXT NOT NULL,
                 PRIMARY KEY (team_name, game_name)
             );`, (err) => {
