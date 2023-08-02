@@ -6,8 +6,8 @@ let teams = teamsJson.teams;
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
 const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-global-commands");
-const { checkIfTeamAlreadyExists } = require('../../Functions/check-if-team-exists');
-const { checkIfGuildHasTeamForGame } = require('../../Functions/check-if-guild-has-team');
+const { checkIfTeamAlreadyExists, checkIfGuildHasTeamForGame } = require('../../Functions/db-checks');
+
 const db = new sqlite3.Database('info.db', (err) => {
   if (err) {
     console.error('Error opening database:', err.message);
@@ -94,13 +94,13 @@ module.exports = {
           fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
 
           const insertQuery = `
-              INSERT INTO teams (guild_id, game_name, team_name, captain_userId, coCaptain_userId, captain_username, coCaptain_username)
-              VALUES (?, ?, ?, ?, ?, ?, ?);
+              INSERT INTO teams (guild_id, game_name, team_name, captain_userId, coCaptain_userId, captain_username, coCaptain_username, availability_measageId, events_channelId, teamMember_roleId)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
           `;
 
           try {
             await new Promise((resolve, reject) => {
-                db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername], function(err) {
+                db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername, 'not set', 'not set', 'not set'], function(err) {
                     if (err) {
                         console.error('Error inserting team:', err.message);
                         reject(err);
@@ -116,7 +116,7 @@ module.exports = {
             ephemeral: true
           });
           return;
-        }
+          }
           try {
             await reloadTeamsAndGamesCommands(client)           
           } catch(error){

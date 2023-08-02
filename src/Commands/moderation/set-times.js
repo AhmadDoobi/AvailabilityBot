@@ -3,6 +3,8 @@ const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 let teams = JSON.parse(fs.readFileSync('teams.json', 'utf8')).teams;
 const gameChoices = JSON.parse(fs.readFileSync('games.json', 'utf8'));
+const { getDbInfo } = require('../../Functions/get-info-from-db');
+const { checkIfTeamHasAvailability } = require('../../Functions/db-checks')
 const db = new sqlite3.Database('info.db', (err) => {
     if (err) {
       console.error('Error opening database:', err.message);
@@ -22,7 +24,7 @@ module.exports = {
                 .setRequired(true))
         .addStringOption(option =>
             option
-                .setName('team')
+                .setName('team_name')
                 .setDescription('select your team')
                 .addChoices(...teams)
                 .setRequired(true))
@@ -71,19 +73,113 @@ module.exports = {
     async execute(interaction) {
         const gameName = interaction.options.getString('game_name');
         const teamName = interaction.options.getString('team_name');
-        const eventsChannel = interaction.options.getChannel('channel').id;
+        const eventsChannelId = interaction.options.getChannel('channel').id;
+        const callerGuildId = interaction.guild.id.toString();
+        const callerId = interaction.user.id.toString();
 
-        if(interaction.options.getRole('team_members_role')){
-            const teamMemberRole = interaction.options.getRole('team_members_role');
+        try {
+            const teamInfo = await getDbInfo(gameName, teamName);
+            teamGuildId = teamInfo.guildId;
+            captainId = teamInfo.captainId;
+            coCaptainId = teamInfo.coCaptainId;
             
+        } catch (error) {
+            console.log('There was an error getting team info:', error);
+            await interaction.reply({
+                content: "there was an error, please try again. \nif this problem keeps happpning please contact <a7a_.>",
+                ephemeral: true
+            });
+            return;
         }
 
-        const fromHour = interaction.options.getInteger('from-hour');
-        const toHour = interaction.options.getInteger('to-hour');
+        if (callerGuildId !== teamGuildId) {
+            await interaction.reply({
+                content: "you can only set your teams times in the server connected to your team!",
+                ephemeral: true 
+            })
+            return;
+        }
+
+        if (callerId !== captainId && callerId !== coCaptainId) {
+            await interaction.reply({
+                content: "you need to be the team captain or co captain to set the times!",
+                ephemeral: true
+            });
+            return;
+        }
+
+        const teamHasAvailability = await checkIfTeamHasAvailability(teamName, gameName)
+        if (teamHasAvailability) {
+            await interaction.reply({
+                content: 'your team has already set the times, if you want to reset them use /reset-times',
+                ephemeral: true
+            });
+            return;
+        }
         
-        let hoursArray = [];
+        const updateQuery = `
+            UPDATE teams 
+            SET
+                events_channelId = ?, teamMember_roleId = ?
+            WHERE 
+                game_name = ? AND team_name = ?;
+            `;
+        if(interaction.options.getRole('team_members_role')){
+            const teamMemberRoleId = interaction.options.getRole('team_members_role').id;
+
+            try {
+                await new Promise((resolve, reject) => {
+                    db.run(updateQuery, [teamMemberRoleId, eventsChannelId, gameName, teamName], function(err) {
+                    if (err) {
+                        console.error('Error inserting team:', err.message);
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                    });
+                });
+            } catch (error) {
+                console.log(`there was an error adding a team, ${error}`)
+                await interaction.reply({
+                    content: 'There was an error processing your request. Please try again. \nif this problem keeps happening please contact <a7a_.>',
+                    ephemeral: true
+                });
+                return;
+            }
+
+        } else {
+            const teamMemberRoleId = "not set";
+            try {
+                await new Promise((resolve, reject) => {
+                    db.run(updateQuery, [teamMemberRoleId, eventsChannelId, gameName, teamName], function(err) {
+                    if (err) {
+                        console.error('Error inserting team:', err.message);
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                    });
+                });
+            } catch (error) {
+                console.log(`there was an error adding a team, ${error}`)
+                await interaction.reply({
+                    content: 'There was an error processing your request. Please try again. \nif this problem keeps happening please contact <a7a_.>',
+                    ephemeral: true
+                });
+                return;
+            }
+        }
+
+        const fromHour = interaction.options.getInteger('from_hour');
+        const toHour = interaction.options.getInteger('to_hour');
+        
         const daysArray = [];
-            
+        const timesArray = [];
+
+        for (hour = fromHour; hour <= toHour; hour++){
+            timesArray.push(hour)
+        }
+
         if (interaction.options.getBoolean('monday')) daysArray.push('monday');
         if (interaction.options.getBoolean('tuesday')) daysArray.push('tuesday');
         if (interaction.options.getBoolean('wednesday')) daysArray.push('wednesday');
@@ -92,8 +188,41 @@ module.exports = {
         if (interaction.options.getBoolean('saturday')) daysArray.push('saturday');
         if (interaction.options.getBoolean('sunday')) daysArray.push('sunday');
 
-        for (let i = fromHour; i <= toHour; i++) {
-            hoursArray.push(i);
+        try {
+            for (let day of daysArray) {
+                for (let hour of timesArray) {
+                    let insertQuery = `
+                        INSERT INTO availability (
+                            team_name,
+                            game_name,
+                            day,
+                            hour,
+                            available_players
+                        )
+                        VALUES (?, ?, ?, ?, ?);
+                    `;
+                    await new Promise((resolve, reject) => {
+                        db.run(insertQuery, [teamName, gameName, day, hour, 0], function(err) {
+                            if (err) {
+                                reject(`There was an error adding availability: ${err.message}`);
+                            } else {
+                                resolve();
+                            }
+                        });
+                    });
+                }
+            }
+        } catch (error) {
+            console.log(`There was an error processing your request: ${error}`)
+            await interaction.reply({
+                content: 'There was an error processing your request. Please try again. \nIf this problem keeps happening please contact <a7a_.>',
+                ephemeral: true
+            });
+            return;
         }
+        await interaction.reply({
+            content:`Successfully set the following days:\n${daysArray.join(", ")}\n\nAnd times:\n${timesArray.join(", ")}`,
+            ephemeral: true
+        });
     }
 };
