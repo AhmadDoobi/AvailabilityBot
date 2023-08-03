@@ -92,7 +92,7 @@ module.exports = {
             const teamInfo = await getDbInfo(gameName, teamName);
             if(!teamInfo){
                 await interaction.reply({
-                    content: "you didn't register your team yet. \nuse /register-team \nif this is a mistake please contact <a7a_.>"
+                    content: "you didn't register your team yet. \nuse /register-team. \nif this is a mistake please contact <a7a_.>"
                 });
                 return;
             }
