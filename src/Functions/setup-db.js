@@ -20,6 +20,7 @@ async function setupDatabase() {
                 availability_measageId TEXT NOT NULL,
                 events_channelId TEXT NIT NULL,
                 teamMember_roleId TEXT NOT NULL,
+                time_zone TEXT NOT NULL,
                 PRIMARY KEY (team_name, game_name)
             );`, (err) => {
                 if (err) {

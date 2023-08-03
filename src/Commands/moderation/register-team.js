@@ -94,13 +94,13 @@ module.exports = {
           fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
 
           const insertQuery = `
-              INSERT INTO teams (guild_id, game_name, team_name, captain_userId, coCaptain_userId, captain_username, coCaptain_username, availability_measageId, events_channelId, teamMember_roleId)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+              INSERT INTO teams (guild_id, game_name, team_name, captain_userId, coCaptain_userId, captain_username, coCaptain_username, availability_measageId, events_channelId, teamMember_roleId, time_zone)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
           `;
 
           try {
             await new Promise((resolve, reject) => {
-                db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername, 'not set', 'not set', 'not set'], function(err) {
+                db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername, 'not set', 'not set', 'not set', 'not set'], function(err) {
                     if (err) {
                         console.error('Error inserting team:', err.message);
                         reject(err);

@@ -18,6 +18,8 @@ async function getDbInfo(game, team) {
     db.get(teamInfo, [team, game], (err, row) => {
       if (err) {
         reject(err);
+      }else if(!row) {
+        resolve(false);
       } else {
         resolve({
           guildId: row.guildId,

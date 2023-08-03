@@ -64,6 +64,16 @@ module.exports = {
                 .addChoices(
                     {name: '6pm', value: 6}, {name: '7pm', value: 7}, {name: '8pm', value: 8}, {name: '9pm', value: 9},
                     {name: '10pm', value: 10}, {name: '11pm', value: 11}, {name: '12pm', value: 12}
+                ))
+        .addStringOption(option =>
+            option
+                .setName('timezone')
+                .setDescription('select the timezone for your team')
+                .setRequired(true)
+                .addChoices(
+                    {name: 'bst', value: 'bst'},
+                    {name: 'est', value: 'est'},
+                    {name: 'gmt', value: 'gmt'},
                 ))  
         .addRoleOption(option =>
             option
@@ -71,6 +81,7 @@ module.exports = {
                 .setDescription('if you dont want the bot to ping the role leave empty')
                 .setRequired(false)),
     async execute(interaction) {
+        const timezone = interaction.options.getString('timezone');
         const gameName = interaction.options.getString('game_name');
         const teamName = interaction.options.getString('team_name');
         const eventsChannelId = interaction.options.getChannel('channel').id;
@@ -79,6 +90,12 @@ module.exports = {
 
         try {
             const teamInfo = await getDbInfo(gameName, teamName);
+            if(!teamInfo){
+                await interaction.reply({
+                    content: "you didn't register your team yet. \nuse /register-team \nif this is a mistake please contact <a7a_.>"
+                });
+                return;
+            }
             teamGuildId = teamInfo.guildId;
             captainId = teamInfo.captainId;
             coCaptainId = teamInfo.coCaptainId;
@@ -86,7 +103,7 @@ module.exports = {
         } catch (error) {
             console.log('There was an error getting team info:', error);
             await interaction.reply({
-                content: "there was an error, please try again. \nif this problem keeps happpning please contact <a7a_.>",
+                content: "there was an error, getting the team info. \nif this problem keeps happpning please contact <a7a_.>",
                 ephemeral: true
             });
             return;
@@ -120,7 +137,7 @@ module.exports = {
         const updateQuery = `
             UPDATE teams 
             SET
-                events_channelId = ?, teamMember_roleId = ?
+                events_channelId = ?, teamMember_roleId = ?, time_zone = ?
             WHERE 
                 game_name = ? AND team_name = ?;
             `;
@@ -129,7 +146,7 @@ module.exports = {
 
             try {
                 await new Promise((resolve, reject) => {
-                    db.run(updateQuery, [teamMemberRoleId, eventsChannelId, gameName, teamName], function(err) {
+                    db.run(updateQuery, [teamMemberRoleId, eventsChannelId, timezone, gameName, teamName], function(err) {
                     if (err) {
                         console.error('Error inserting team:', err.message);
                         reject(err);
@@ -151,7 +168,7 @@ module.exports = {
             const teamMemberRoleId = "not set";
             try {
                 await new Promise((resolve, reject) => {
-                    db.run(updateQuery, [teamMemberRoleId, eventsChannelId, gameName, teamName], function(err) {
+                    db.run(updateQuery, [teamMemberRoleId, eventsChannelId, timezone, gameName, teamName], function(err) {
                     if (err) {
                         console.error('Error inserting team:', err.message);
                         reject(err);
