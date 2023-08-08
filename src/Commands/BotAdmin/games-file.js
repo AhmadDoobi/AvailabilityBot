@@ -2,7 +2,7 @@ const { SlashCommandBuilder, PermissionFlagsBits} = require('discord.js');
 const fs = require('fs');
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
-const { addGame, deleteGame } = require('../../Functions/games-file-options.js');
+const { addGame, deleteGame } = require('../../Handlers/games-file-options.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -29,6 +29,10 @@ module.exports = {
                         .addChoices(...gameChoices)
                         .setRequired(true))),
     async execute(interaction, client) {
+        await interaction.reply({
+            content: 'processing...',
+            ephemeral: true
+        })
         const gameName = interaction.options.getString('game_name');
         const subCommand = interaction.options.getSubcommand();
 
@@ -36,13 +40,13 @@ module.exports = {
             case 'add_game': {
                 try {
                     const state = await addGame(gameName, client);
-                    await interaction.reply({
+                    await interaction.editReply({
                         content: state,
                         ephemeral: true
                     })          
                 } catch(error){
                     console.log(error)
-                    await interaction.reply({
+                    await interaction.editReply({
                       content: `there was an error adding the game. please try again.`,
                       ephemeral: true 
                     });
@@ -54,13 +58,13 @@ module.exports = {
             case 'delete_game': {
                 try{
                     const state = await deleteGame(gameName, client);
-                    await interaction.reply({
+                    await interaction.editReply({
                         content: state,
                         ephemeral: true
                     });     
                 } catch(error){
                     console.log(error)
-                    await interaction.reply({
+                    await interaction.editReply({
                         content: `there was an error deleting the game info. please try again.`,
                         ephemeral: true 
                       });
