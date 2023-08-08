@@ -11,7 +11,7 @@ const db = new sqlite3.Database('info.db', (err) => {
     }
 });
 const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-global-commands");
-const { deleteTeamAvailability } = require('../../Functions/delete-team-availability')
+const { deleteTeamAvailability } = require('../../Handlers/delete-team-availability')
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -32,6 +32,10 @@ module.exports = {
                 .addChoices(...teams)),
 
     async execute(interaction, client){
+        await interaction.reply({
+            content: 'processing...',
+            ephemeral: true
+        })
         const gameName = interaction.options.getString('game_name');
         const teamName = interaction.options.getString('team_name');
         let state;
@@ -56,16 +60,17 @@ module.exports = {
             }
             fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
             try {
-                await reloadTeamsAndGamesCommands(client)           
+                const insideCommand = true;
+                await reloadTeamsAndGamesCommands(client, insideCommand)           
             } catch(error){
                 console.log(error)
-                await interaction.reply({
+                await interaction.editReply({
                   content: `successfully deleted team ${teamName}, from game ${gameName}.\n and ${state}\n❌❌❌ But there was an error reloading the commands.`,
                   ephemeral: true 
                 });
                 return;
             }
-            await interaction.reply({
+            await interaction.editReply({
                 content: `successfully deleted team ${teamName}, from game ${gameName}.\n and ${state}`,
                 ephemeral: true
             });
