@@ -3,7 +3,7 @@ dotenv.config();
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const token = process.env.TOKEN;
 const { loadEvents } = require("./Handlers/event-handler");
-const { setupDatabase } = require('./Functions/setup-db')
+const { setupDatabase } = require('./Handlers/setup-db')
 // set the intetns for the bot
 const client = new Client({ intents: [
     GatewayIntentBits.DirectMessages,

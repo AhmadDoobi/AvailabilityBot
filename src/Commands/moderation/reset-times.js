@@ -5,7 +5,7 @@ let teams = JSON.parse(fs.readFileSync('teams.json', 'utf8')).teams;
 const gameChoices = JSON.parse(fs.readFileSync('games.json', 'utf8'));
 const { getDbInfo } = require('../../Functions/get-info-from-db');
 const { checkIfTeamHasAvailability } = require('../../Functions/db-checks')
-const { deleteTeamAvailability } = require('../../Functions/delete-team-availability')
+const { deleteTeamAvailability } = require('../../Handlers/delete-team-availability')
 const db = new sqlite3.Database('info.db', (err) => {
     if (err) {
       console.error('Error opening database:', err.message);
@@ -82,6 +82,10 @@ module.exports = {
                 .setDescription('if you dont want the bot to ping the role leave empty')
                 .setRequired(false)),
     async execute(interaction) {
+        await interaction.reply({
+            content: 'processing...',
+            ephemeral: true
+        })
         const timezone = interaction.options.getString('timezone');
         const gameName = interaction.options.getString('game_name');
         const teamName = interaction.options.getString('team_name');
@@ -97,7 +101,7 @@ module.exports = {
             
         } catch (error) {
             console.log('There was an error getting team info:', error);
-            await interaction.reply({
+            await interaction.editReply({
                 content: "there was an error, please try again. \nif this problem keeps happpning please contact <a7a_.>",
                 ephemeral: true
             });
@@ -105,7 +109,7 @@ module.exports = {
         }
 
         if (callerGuildId !== teamGuildId) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: "you can only reset your teams times in the server connected to your team!",
                 ephemeral: true 
             })
@@ -113,7 +117,7 @@ module.exports = {
         }
 
         if (callerId !== captainId && callerId !== coCaptainId) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: "you need to be the team captain or co captain to reset the times!",
                 ephemeral: true
             });
@@ -122,7 +126,7 @@ module.exports = {
 
         const teamHasAvailability = await checkIfTeamHasAvailability(teamName, gameName)
         if (!teamHasAvailability) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'your team still didnt register any times. use /set-times to register team times',
                 ephemeral: true
             });
@@ -133,7 +137,7 @@ module.exports = {
             await deleteTeamAvailability(teamName, gameName)
         } catch(error) {
             console.log(error)
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'something went wrong please try again',
                 ephemeral: true 
             })
@@ -164,7 +168,7 @@ module.exports = {
                 });
             } catch (error) {
                 console.log(`there was an error adding a team, ${error}`)
-                await interaction.reply({
+                await interaction.editReply({
                     content: 'There was an error processing your request. Please try again. \nif this problem keeps happening please contact <a7a_.>',
                     ephemeral: true
                 });
@@ -186,7 +190,7 @@ module.exports = {
                 });
             } catch (error) {
                 console.log(`there was an error adding a team, ${error}`)
-                await interaction.reply({
+                await interaction.editReply({
                     content: 'There was an error processing your request. Please try again. \nif this problem keeps happening please contact <a7a_.>',
                     ephemeral: true
                 });
@@ -238,13 +242,13 @@ module.exports = {
             }
         } catch (error) {
             console.log(`There was an error processing your request: ${error}`)
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'There was an error processing your request. Please try again. \nIf this problem keeps happening please contact <a7a_.>',
                 ephemeral: true
             });
             return;
         }
-        await interaction.reply({
+        await interaction.editReply({
             content:`Successfully reset to the following days:\n${daysArray.join(", ")}\n\nAnd times:\n${timesArray.join(", ")}`,
             ephemeral: true
         });

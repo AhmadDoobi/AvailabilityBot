@@ -42,6 +42,10 @@ module.exports = {
                 .setDescription('set the team co-captain')
                 .setRequired(true)),
     async execute(interaction, client) {
+        await interaction.reply({
+          content: 'processing...',
+          ephemeral: true
+        })
         // Get the game name 
         const gameName = interaction.options.getString('game_name');
         // Get the team name 
@@ -63,14 +67,14 @@ module.exports = {
 
         const teamExistsOnAnotherServer = await checkIfTeamAlreadyExists(gameName, teamName, guildId);
         if (teamExistsOnAnotherServer) {
-            await interaction.reply({ 
+            await interaction.editReply({ 
               content: 'The team name you tried to set is already connected to another server. \nif you think this is a mistake please contact <a7a_.>', 
               ephemeral: true });
             return;
         }
         const guildHasTeamForGame = await checkIfGuildHasTeamForGame(guildId, gameName);
         if (guildHasTeamForGame) {
-            await interaction.reply({ 
+            await interaction.editReply({ 
               content: 'Only one team is available per game for each server.\nif you wish to change your current team info and you are the captain or co-captain of the team use </reset-team-info>.\n otherwise contact <a7a_.>. ',
               ephemeral: true });
             return;
@@ -111,17 +115,18 @@ module.exports = {
             });
           } catch (error) {
           console.log(`there was an error adding a team, ${error}`)
-          await interaction.reply({
+          await interaction.editReply({
             content: 'There was an error processing your request. Please try again. \nif this problem keeps happening please contact <a7a_.>',
             ephemeral: true
           });
           return;
           }
           try {
-            await reloadTeamsAndGamesCommands(client)           
+            const insideCommand = true;
+            await reloadTeamsAndGamesCommands(client, insideCommand)           
           } catch(error){
             console.log(error)
-            await interaction.reply({
+            await interaction.editReply({
               content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".\n❌❌❌ But there was an error reloading the commands, please contact <a7a_.>.`,
               ephemeral: true 
             });
@@ -129,13 +134,13 @@ module.exports = {
           }
         } catch(error) {
           console.log(`there was an error: ${error}`)
-          await interaction.reply({
+          await interaction.editReply({
           content: "something went wrong. please try again. \nif this problem keeps happening please contact <a7a_.>",
           ephemeral: true
           });
           return;
         }
-        await interaction.reply({
+        await interaction.editReply({
           content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".`, 
           ephemeral: true
         });

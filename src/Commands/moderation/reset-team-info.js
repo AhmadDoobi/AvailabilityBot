@@ -46,6 +46,10 @@ module.exports = {
                 .setDescription('set the new co-captain, if you dont want to change the team co-captain leave empty.')
                 .setRequired(false)),
     async execute(interaction, client) {
+        await interaction.reply({
+            content: 'processing...',
+            ephemeral: true
+        })
         const gameName = interaction.options.getString('game_name');
         const teamName = interaction.options.getString('team_name');
         const newTeamName = interaction.options.getString('new_team_name');
@@ -67,7 +71,7 @@ module.exports = {
             
         } catch (error) {
             console.log('There was an error getting team info:', error);
-            await interaction.reply({
+            await interaction.editReply({
                 content: "there was an error, please try again. \nif this problem keeps happpning please contact <a7a_.>",
                 ephemeral: true
             });
@@ -75,7 +79,7 @@ module.exports = {
         }
 
         if (callerGuildId !== teamGuildId) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: "you can only change your teams info in the server connected to your team!",
                 ephemeral: true 
             })
@@ -83,7 +87,7 @@ module.exports = {
         }
 
         if (callerId !== captainId && callerId !== coCaptainId) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: "you need to be the team captain or co captain to change its info!",
                 ephemeral: true
             });
@@ -193,21 +197,22 @@ module.exports = {
 
         if(teamNameUpdated || captainUpdated || coCaptainUpdated) {
             try {
-                await reloadTeamsAndGamesCommands(client)           
-              } catch(error){
+                const insideCommand = true;
+                await reloadTeamsAndGamesCommands(client, insideCommand) 
+            } catch(error){
                 console.log(error)
-                await interaction.reply({
+                await interaction.editReply({
                   content: `${teamNameUpdated}, \n${captainUpdated}, \n${coCaptainUpdated}.\n❌❌❌ But there was an error reloading the commands, please contact <a7a_.>.`,
                   ephemeral: true 
                 });
                 return;
               }
-              await interaction.reply({
+              await interaction.editReply({
                 content: `${teamNameUpdated}, \n${captainUpdated}, \n${coCaptainUpdated}.`,
                 ephemeral: true
             });
         } else {
-            await interaction.reply({
+            await interaction.editReply({
                 content: "nothing to update here, if this is a mistake please contact <a7a_.>.",
                 ephemeral: true
             });

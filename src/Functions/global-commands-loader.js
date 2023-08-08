@@ -19,10 +19,10 @@ function getFiles(folderPath) {
         const itemPath = path.join(folderPath, item);
         const stat = fs.statSync(itemPath);
 
-        // If the directory is botAdmin and the file is not reset_team.js, skip it
-        if (path.basename(folderPath) === 'dmin' && item !== 'reset-team.js') {
+        if (path.basename(folderPath) === 'BotAdmin' && (item !== 'delete-team.js' && item !== 'games-file.js')) {
             continue;
         }
+        
 
         if (stat.isDirectory()) {
             files = files.concat(getFiles(itemPath));

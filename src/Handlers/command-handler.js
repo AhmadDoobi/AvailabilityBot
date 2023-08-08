@@ -2,7 +2,8 @@ const { loadFiles } = require("../Functions/files-loader");
 const ascii = require("ascii-table");
 const path = require('node:path');
 
-async function loadCommands(client) {
+async function loadCommands(client, startup) {
+    let state;
     const table = new ascii().setHeading("commands", "type", "status");
 
 
@@ -17,8 +18,10 @@ async function loadCommands(client) {
         const command = require(file);
         if(!command.data){
             console.log(`❌❌❌ There is no data in file: ${file}!`);
-            return;
+            state += `❌❌❌ There is no data in command: ${command}!\n`
+            return state;
         };
+        
         const folder = path.basename(path.dirname(file));
         command.category = folder;
         client.commands.set(command.data.name, command);
@@ -30,6 +33,7 @@ async function loadCommands(client) {
                 table.addRow(command.data.name, "Admin", "✅");
             } else {
                 table.addRow(command.data.name, "Admin", "🔴");
+                state += `🔴 There is no execute for command: ${command.data.name}!\n`
             }
         } else {
             if ('data' in command && 'execute' in command) {
@@ -37,19 +41,31 @@ async function loadCommands(client) {
                 table.addRow(command.data.name, "Global", "✅");
             } else {
                 table.addRow(command.data.name, "Global", "🔴");
+                state += `🔴 There is no execute for command: ${command.data.name}!\n`
             }
         }
     })
 
-    // Globally set all non-admin commands
-    client.application.commands.set(globalCommandsArray);
+    if (globalCommandsArray || adminCommandsArray){
+        // Globally set all non-admin commands
+        client.application.commands.set(globalCommandsArray);
 
-    // Set admin commands to the admin guild
-    const guildId = '1131204470274019368';
-    const guild = client.guilds.cache.get(guildId);
-    guild.commands.set(adminCommandsArray);
+        // Set admin commands to the admin guild
+        const guildId = '1131204470274019368';
+        const guild = client.guilds.cache.get(guildId);
+        guild.commands.set(adminCommandsArray);
 
-    return console.log(table.toString(), "\nCommands Loaded")
+        state += 'rest of the commands successfully reloaded!'
+    } else {
+        state += "didn't reload any command "
+    }
+
+    if (startup){
+        return console.log(table.toString(), "\nCommands Loaded")
+    } else {
+        console.log(table.toString(), "\nCommands Reloaded")
+        return state
+    }
 }
 
 module.exports = { loadCommands };

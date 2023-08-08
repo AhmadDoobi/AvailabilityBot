@@ -81,6 +81,10 @@ module.exports = {
                 .setDescription('if you dont want the bot to ping the role leave empty')
                 .setRequired(false)),
     async execute(interaction) {
+        await interaction.reply({
+            content: 'processing...',
+            ephemeral: true
+        })
         const timezone = interaction.options.getString('timezone');
         const gameName = interaction.options.getString('game_name');
         const teamName = interaction.options.getString('team_name');
@@ -91,7 +95,7 @@ module.exports = {
         try {
             const teamInfo = await getDbInfo(gameName, teamName);
             if(!teamInfo){
-                await interaction.reply({
+                await interaction.editReply({
                     content: "you didn't register your team yet. \nuse /register-team. \nif this is a mistake please contact <a7a_.>"
                 });
                 return;
@@ -102,7 +106,7 @@ module.exports = {
             
         } catch (error) {
             console.log('There was an error getting team info:', error);
-            await interaction.reply({
+            await interaction.editReply({
                 content: "there was an error, getting the team info. \nif this problem keeps happpning please contact <a7a_.>",
                 ephemeral: true
             });
@@ -110,7 +114,7 @@ module.exports = {
         }
 
         if (callerGuildId !== teamGuildId) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: "you can only set your teams times in the server connected to your team!",
                 ephemeral: true 
             })
@@ -118,7 +122,7 @@ module.exports = {
         }
 
         if (callerId !== captainId && callerId !== coCaptainId) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: "you need to be the team captain or co captain to set the times!",
                 ephemeral: true
             });
@@ -127,7 +131,7 @@ module.exports = {
 
         const teamHasAvailability = await checkIfTeamHasAvailability(teamName, gameName)
         if (teamHasAvailability) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'your team has already set the times, if you want to reset them use /reset-times',
                 ephemeral: true
             });
@@ -157,7 +161,7 @@ module.exports = {
                 });
             } catch (error) {
                 console.log(`there was an error adding a team, ${error}`)
-                await interaction.reply({
+                await interaction.editReply({
                     content: 'There was an error processing your request. Please try again. \nif this problem keeps happening please contact <a7a_.>',
                     ephemeral: true
                 });
@@ -179,7 +183,7 @@ module.exports = {
                 });
             } catch (error) {
                 console.log(`there was an error adding a team, ${error}`)
-                await interaction.reply({
+                await interaction.editReply({
                     content: 'There was an error processing your request. Please try again. \nif this problem keeps happening please contact <a7a_.>',
                     ephemeral: true
                 });
@@ -231,13 +235,13 @@ module.exports = {
             }
         } catch (error) {
             console.log(`There was an error processing your request: ${error}`)
-            await interaction.reply({
+            await interaction.editReply({
                 content: 'There was an error processing your request. Please try again. \nIf this problem keeps happening please contact <a7a_.>',
                 ephemeral: true
             });
             return;
         }
-        await interaction.reply({
+        await interaction.editReply({
             content:`Successfully set the following days:\n${daysArray.join(", ")}\n\nAnd times:\n${timesArray.join(", ")}`,
             ephemeral: true
         });
