@@ -11,7 +11,10 @@ async function getDbInfo(game, team) {
                     captain_userId AS captainId, 
                     coCaptain_userId AS coCaptainId, 
                     captain_username AS captainUsername, 
-                    coCaptain_username AS coCaptainUsername 
+                    coCaptain_username AS coCaptainUsername,
+                    teamMember_roleId AS teamMemberRoleId,
+                    events_channelId AS eventsChannelId,
+                    time_zone AS timezone
                     FROM teams
                     WHERE team_name = ? AND game_name = ?`;
 
@@ -26,7 +29,10 @@ async function getDbInfo(game, team) {
           captainId: row.captainId,
           coCaptainId: row.coCaptainId,
           captainUsername: row.captainUsername,
-          coCaptainUsername: row.coCaptainUsername
+          coCaptainUsername: row.coCaptainUsername,
+          eventsChannelId: row.eventsChannelId,
+          teamMemberRoleId: row.teamMemberRoleId,
+          timezone: row.timezone
         });
       }
     });
