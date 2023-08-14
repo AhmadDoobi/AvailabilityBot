@@ -107,7 +107,7 @@ module.exports = {
         } catch (error) {
             console.log('There was an error getting team info:', error);
             await interaction.editReply({
-                content: "there was an error, getting the team info. \nif this problem keeps happpning please contact <a7a_.>",
+                content: "there was an error getting the team info. \nif this problem keeps happpning please contact <a7a_.>",
                 ephemeral: true
             });
             return;
