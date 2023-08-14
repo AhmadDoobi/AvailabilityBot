@@ -10,7 +10,7 @@ async function deleteCachedFile(file) {
 
 async function loadCommandFile(commandCategory, commandName) {
     try {
-        const commandFile = path.join(__dirname, '..', 'commands', commandCategory, `${commandName}.js`);
+        const commandFile = path.join(__dirname, '../', 'commands', commandCategory, `${commandName}.js`);
         if (fs.existsSync(commandFile)) {
             await deleteCachedFile(commandFile);
             return require(commandFile);
@@ -22,5 +22,4 @@ async function loadCommandFile(commandCategory, commandName) {
         throw error;
     }
 }
-
 module.exports = { loadCommandFile };

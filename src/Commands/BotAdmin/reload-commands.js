@@ -93,7 +93,7 @@ module.exports = {
 								.setRequired(true)
 								.addChoices(
 									{name: 'get-team-info', value: 'get-team-info'},
-									{name: 'get-teams-availability', value: 'get-teams-availability'},
+									{name: 'teams-availability', value: 'teams-availability'},
 								)			
 						)
 				)
