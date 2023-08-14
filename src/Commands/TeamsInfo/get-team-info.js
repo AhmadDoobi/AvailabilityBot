@@ -30,17 +30,19 @@ module.exports = {
         const gameName = interaction.options.getString('game_name');
         let captainUsername;
         let coCaptainUsername;
+        let teamTimezone
 
         try {
             const teamInfo = await getDbInfo(gameName, teamName);
             captainUsername = teamInfo.captainUsername;
             coCaptainUsername = teamInfo.coCaptainUsername;
+            teamTimezone = teamInfo.timezone
             await interaction.editReply({
-                content: `team ${teamName}\n  captain: ${captainUsername}\n  co-captain ${coCaptainUsername}`,
+                content: `team ${teamName}\n  captain: ${captainUsername}\n  co-captain: ${coCaptainUsername}\n  team timezone: ${teamTimezone}`,
                 ephemeral: true
             })
         } catch(error) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: "something went wrong while getting the team info please try again",
                 ephemeral: true 
             });
