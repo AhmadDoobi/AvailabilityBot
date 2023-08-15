@@ -1,6 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits} = require('discord.js');
 const { loadCommands } = require('../../Handlers/command-handler');
-const { reloadTeamsAndGamesCommands } = require('../../Handlers/reload-global-commands');
 const { reloadSpecificCommand } = require('../../Handlers/reload-specific-command')
 
 module.exports = {
@@ -12,10 +11,6 @@ module.exports = {
 			subcommand 
 				.setName('all-commands')
 				.setDescription('reload all commands'))
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName('global-commands')
-				.setDescription('reload all games and teams commands'))
 		.addSubcommandGroup(subcommandgroup =>
 			subcommandgroup
 				.setName('specific')
@@ -103,63 +98,25 @@ module.exports = {
 				content: 'processing...',
 				ephemeral: true
 			})
+
 			const subcommand = interaction.options.getSubcommand();
+
 			if (interaction.options.getSubcommandGroup()){
 				const commandName = interaction.options.getString('command-name');
-				try {
-					const state = await reloadSpecificCommand(subcommand, commandName, client)
-					await interaction.editReply({
-						content: state,
-						ephemeral: true
-					})
-				} catch (error){
-					console.log(error)
-					await interaction.editReply({
-						content: 'something went wrong. please try again',
-						ephemeral: true
-					})
-					return;
-				}
-				return;
+				const state = await reloadSpecificCommand(subcommand, commandName, client)
+				await interaction.editReply({
+					content: state,
+					ephemeral: true
+				})
 			}
 
-			switch (subcommand) {
-				case 'all-commands': {
-					try{
-						const startup = false
-						const state = await loadCommands(client, startup)
-						await interaction.editReply({
-							content: state,
-							ephemeral: true
-						})
-					} catch (error){
-						console.log(error)
-						const state = await interaction.editReply({
-							content: state,
-							ephemeral: true
-						})
-						return;
-					}
-				}
-				return;
-
-				case 'global-commands': {
-					try{
-						const insideCommand = false;
-						const state = await reloadTeamsAndGamesCommands(client, insideCommand) 
-						await interaction.editReply({
-							content: state,
-							ephemeral: true 
-						})
-					} catch(error){
-						console.log(error)
-						await interaction.editReply({
-							content: 'something went wrong. please try again',
-							ephemeral: true
-						})
-					}
-				}
-				return;
+			if (subcommand === 'all-commands'){
+				const startup = false
+				const state = await loadCommands(client, startup)
+				await interaction.editReply({
+					content: state,
+					ephemeral: true
+				})
 			}
 		}
 }

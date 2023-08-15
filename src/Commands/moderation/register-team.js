@@ -5,7 +5,7 @@ let teamsJson = JSON.parse(fs.readFileSync('teams.json', 'utf8'));
 let teams = teamsJson.teams;
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
-const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-global-commands");
+const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-teams-games-commands");
 const { checkIfTeamAlreadyExists, checkIfGuildHasTeamForGame } = require('../../Functions/db-checks');
 
 const db = new sqlite3.Database('info.db', (err) => {
@@ -80,66 +80,52 @@ module.exports = {
             return;
         }
         
-        try {
-          // Prepare the team object
-          let teamObject = {"name": teamName, "value": teamName};
 
-          // Check if the team already exists
-          let teamExists = teams.some(team => team.name === teamName);
+        // Prepare the team object
+        let teamObject = {"name": teamName, "value": teamName};
 
-          if (!teamExists) {
-            // Add the team to the game
-            teams.push(teamObject);
-            teamsJson["games per team name"][teamName] = 1;
+        // Check if the team already exists
+        let teamExists = teams.some(team => team.name === teamName);
+
+        if (!teamExists) {
+          // Add the team to the game
+          teams.push(teamObject);
+          teamsJson["games per team name"][teamName] = 1;
             
-          } else {
-            teamsJson["games per team name"][teamName]++;            
-          }
-          fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
-
-          const insertQuery = `
-              INSERT INTO teams (guild_id, game_name, team_name, captain_userId, coCaptain_userId, captain_username, coCaptain_username, availability_measageId, events_channelId, teamMember_roleId, time_zone)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-          `;
-
-          try {
-            await new Promise((resolve, reject) => {
-                db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername, 'not set', 'not set', 'not set', 'not set'], function(err) {
-                    if (err) {
-                        console.error('Error inserting team:', err.message);
-                        reject(err);
-                    } else {
-                        resolve();
-                    }
-                });
-            });
-          } catch (error) {
-          console.log(`there was an error adding a team, ${error}`)
-          await interaction.editReply({
-            content: 'There was an error processing your request. Please try again. \nif this problem keeps happening please contact <a7a_.>',
-            ephemeral: true
-          });
-          return;
-          }
-          try {
-            const insideCommand = true;
-            await reloadTeamsAndGamesCommands(client, insideCommand)           
-          } catch(error){
-            console.log(error)
-            await interaction.editReply({
-              content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".\n❌❌❌ But there was an error reloading the commands, please contact <a7a_.>.`,
-              ephemeral: true 
-            });
-            return;
-          }
-        } catch(error) {
-          console.log(`there was an error: ${error}`)
-          await interaction.editReply({
-          content: "something went wrong. please try again. \nif this problem keeps happening please contact <a7a_.>",
-          ephemeral: true
-          });
-          return;
+        } else {
+          teamsJson["games per team name"][teamName]++;            
         }
+        fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
+
+        const insertQuery = `
+            INSERT INTO teams (guild_id, game_name, team_name, captain_userId, coCaptain_userId, captain_username, coCaptain_username, events_channelId, teamMember_roleId, time_zone)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        `;
+
+        try {
+          await new Promise((resolve, reject) => {
+              db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername, 'not set', 'not set', 'not set'], function(err) {
+                  if (err) {
+                      console.error('Error inserting team:', err.message);
+                      reject(err);
+                  } else {
+                      resolve();
+                  }
+              });
+          });
+        } catch (error) {
+        console.log(`there was an error adding a team, ${error}`)
+        await interaction.editReply({
+          content: 'There was an error processing your request. Please try again. \nif this problem keeps happening please contact <a7a_.>',
+          ephemeral: true
+        });
+        return;
+        }
+
+        const insideCommand = true;
+        const gamesCommands = false;
+        await reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands)           
+
         await interaction.editReply({
           content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".`, 
           ephemeral: true

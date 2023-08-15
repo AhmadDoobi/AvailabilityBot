@@ -10,8 +10,10 @@ const db = new sqlite3.Database('info.db', (err) => {
       console.error('Error opening database:', err.message);
     }
 });
-const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-global-commands");
+const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-teams-games-commands");
 const { getDbInfo } = require('../../Functions/get-info-from-db')
+const { getTeamByGuild } = require('../../Functions/get-team-by-guild');
+const { resolve } = require("path");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -24,12 +26,6 @@ module.exports = {
                 .setDescription('chose the game for the team you want to reset')
                 .setRequired(true)
                 .addChoices(...gameChoices))
-        .addStringOption(option =>
-            option
-                .setName('team_name')
-                .setDescription('chose the team you want to reset the info for')
-                .setRequired(true)
-                .addChoices(...teams))
         .addStringOption(option =>
             option
                 .setName('new_team_name')
@@ -51,11 +47,10 @@ module.exports = {
             ephemeral: true
         })
         const gameName = interaction.options.getString('game_name');
-        const teamName = interaction.options.getString('team_name');
         const newTeamName = interaction.options.getString('new_team_name');
         const callerGuildId = interaction.guild.id.toString();
+        const { teamName } = await getTeamByGuild(callerGuildId, gameName);
         const callerId = interaction.user.id.toString();
-        let teamGuildId;
         let captainId;
         let coCaptainId;
         let captainUpdated;
@@ -65,7 +60,6 @@ module.exports = {
 
         try {
             const teamInfo = await getDbInfo(gameName, teamName);
-            teamGuildId = teamInfo.guildId;
             captainId = teamInfo.captainId;
             coCaptainId = teamInfo.coCaptainId;
             
@@ -78,14 +72,13 @@ module.exports = {
             return;
         }
 
-        if (callerGuildId !== teamGuildId) {
+        if (!teamName) {
             await interaction.editReply({
-                content: "you can only change your teams info in the server connected to your team!",
+                content: "you didn't register a team with the given game to you'r server yet! \nplease use /register-team",
                 ephemeral: true 
             })
             return;
         }
-
         if (callerId !== captainId && callerId !== coCaptainId) {
             await interaction.editReply({
                 content: "you need to be the team captain or co captain to change its info!",
@@ -154,21 +147,40 @@ module.exports = {
             if(newTeamName !== teamName){
                 try {
                     await new Promise((resolve, reject) => {
-                      let sql = `UPDATE Teams 
+                      
+                        let sql = `UPDATE Teams 
                                   SET team_name = ?
                                   WHERE team_name = ? AND game_name = ?`;
                   
-                      db.run(sql, [newTeamName, teamName, gameName], function(err) {
-                        if (err) {
-                          reject(`There was an error updating the team: ${teamName} ${err.message}`);
-                        } else {
-                            resolve(
-                                teamNameUpdated = `team name updated to ${newTeamName}`,
-                                updated += 1
-                            );
-                        }
-                      });
+                        db.run(sql, [newTeamName, teamName, gameName], function(err) {
+                            if (err) {
+                                reject(`There was an error updating the team: ${teamName} ${err.message}`);
+                            } else {
+                                resolve(
+                                    teamNameUpdated = `team name updated in teams table to ${newTeamName}\n`,
+                                    updated += 1
+                                );
+                            }
+                        });
                     });
+
+                    await new Promise((resolve, reject) => {
+                        let sql = `UPDATE availability
+                                    SET team_name = ?
+                                    WHERE team_name = ? AND game_name = ?`;
+                        
+                        db.run(sql, [newTeamName, teamName, gameName], function(err) {
+                            if (err) {
+                                reject(`There was an error updating the team: ${teamName} ${err.message}`);
+                            } else {
+                                resolve(
+                                    teamNameUpdated += `team name updated in availability table to ${newTeamName}`,
+                                    updated += 1
+                                );
+                            }
+                        });
+                    });
+
                     if (gamesPerTeamName[teamName] <= 1) {
                         delete gamesPerTeamName[teamName];
                         teamsJson.teams = teams.filter(team => team.name !== teamName);
@@ -186,19 +198,22 @@ module.exports = {
                     fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
                 } catch (error) {
                     console.error("error trying to update the new team name: ", error);
-                    teamNameUpdated = 'something went wrong while updating the team name';
+                    teamNameUpdated += '\nsomething went wrong while updating the team name';
                 }
             }
         }
 
         if(updated > 0 ) {
-            reloadTeamsAndGamesCommands(client);
+            const gamesCommands = false;
+            const insideCommand = true;
+            reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands);
         };
 
         if(teamNameUpdated || captainUpdated || coCaptainUpdated) {
             try {
                 const insideCommand = true;
-                await reloadTeamsAndGamesCommands(client, insideCommand) 
+                const gamesCommands = false;
+                await reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands) 
             } catch(error){
                 console.log(error)
                 await interaction.editReply({

@@ -19,10 +19,12 @@ function getFiles(folderPath) {
         const itemPath = path.join(folderPath, item);
         const stat = fs.statSync(itemPath);
 
-        if (path.basename(folderPath) === 'BotAdmin' && (item !== 'delete-team.js' && item !== 'games-file.js')) {
+        if (path.basename(folderPath) === 'BotAdmin' && (item !== 'delete-team.js' && item !== 'games-file.js' && item)) {
             continue;
         }
-        
+        if (path.basename(folderPath) === 'Help') {
+            continue;
+        }
 
         if (stat.isDirectory()) {
             files = files.concat(getFiles(itemPath));
@@ -35,7 +37,7 @@ function getFiles(folderPath) {
 }
 
 
-async function globalCommandsFiles() {
+async function gamesCommandsFiles() {
     try {
         const folderPath = path.join(__dirname, '..', 'commands');
         const jsFiles = getFiles(folderPath);
@@ -47,4 +49,4 @@ async function globalCommandsFiles() {
     }
 }
 
-module.exports = { globalCommandsFiles };
+module.exports = { gamesCommandsFiles };

@@ -10,7 +10,7 @@ const db = new sqlite3.Database('info.db', (err) => {
       console.error('Error opening database:', err.message);
     }
 });
-const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-global-commands");
+const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-teams-games-commands");
 const { deleteTeamAvailability } = require('../../Handlers/delete-team-availability')
 
 module.exports = {
@@ -39,43 +39,34 @@ module.exports = {
         const gameName = interaction.options.getString('game_name');
         const teamName = interaction.options.getString('team_name');
         let state;
-        try {
-            await new Promise((resolve, reject) => {
-                let deleteTeamQuery = `DELETE FROM teams WHERE team_name = ? AND game_name = ?`;
 
-                db.run(deleteTeamQuery, [teamName, gameName], (err) => {
-                    if (err) {
-                        reject(`There was an error deleting the team: ${teamName} ${err.message}`);
-                    } else {
-                        resolve(`Team: ${teamName} deleted successfully.`);
-                    }
-                 });
+        await new Promise((resolve, reject) => {
+            let deleteTeamQuery = `DELETE FROM teams WHERE team_name = ? AND game_name = ?`;
+
+            db.run(deleteTeamQuery, [teamName, gameName], (err) => {
+                if (err) {
+                    reject(`There was an error deleting the team: ${teamName} ${err.message}`);
+                } else {
+                    resolve(`Team: ${teamName} deleted successfully.`);
+                }
             });
-            state = await deleteTeamAvailability(teamName, gameName)
-            if(teamsJson['games per team name'][teamName] > 1) {
-                teamsJson['games per team name'][teamName]--;
-            } else {
-                delete teamsJson['games per team name'][teamName];
-                teamsJson.teams = teamsJson.teams.filter(team => team.name !== teamName);
-            }
-            fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
-            try {
-                const insideCommand = true;
-                await reloadTeamsAndGamesCommands(client, insideCommand)           
-            } catch(error){
-                console.log(error)
-                await interaction.editReply({
-                  content: `successfully deleted team ${teamName}, from game ${gameName}.\n and ${state}\n❌❌❌ But there was an error reloading the commands.`,
-                  ephemeral: true 
-                });
-                return;
-            }
-            await interaction.editReply({
-                content: `successfully deleted team ${teamName}, from game ${gameName}.\n and ${state}`,
-                ephemeral: true
-            });
-        } catch (error) {
-            console.error('There was an error deleting the team:', error);
+        });
+        state = await deleteTeamAvailability(teamName, gameName)
+        if(teamsJson['games per team name'][teamName] > 1) {
+            teamsJson['games per team name'][teamName]--;
+        } else {
+            delete teamsJson['games per team name'][teamName];
+            teamsJson.teams = teamsJson.teams.filter(team => team.name !== teamName);
         }
+        fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
+
+        const insideCommand = true;
+        const gamesCommands = false;
+        await reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands)           
+
+        await interaction.editReply({
+            content: `successfully deleted team ${teamName}, from game ${gameName}.\n and ${state}`,
+            ephemeral: true
+        });
     }
 };

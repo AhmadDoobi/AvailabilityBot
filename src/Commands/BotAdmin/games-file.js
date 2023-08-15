@@ -38,39 +38,24 @@ module.exports = {
 
         switch (subCommand) {
             case 'add_game': {
-                try {
-                    const state = await addGame(gameName, client);
-                    await interaction.editReply({
-                        content: state,
-                        ephemeral: true
-                    })          
-                } catch(error){
-                    console.log(error)
-                    await interaction.editReply({
-                      content: `there was an error adding the game. please try again.`,
-                      ephemeral: true 
-                    });
-                    return;
-                }
+
+                const state = await addGame(gameName, client);
+                await interaction.editReply({
+                    content: state,
+                    ephemeral: true
+                })          
             }
             break;
 
             case 'delete_game': {
-                try{
-                    const state = await deleteGame(gameName, client);
-                    await interaction.editReply({
-                        content: state,
-                        ephemeral: true
-                    });     
-                } catch(error){
-                    console.log(error)
-                    await interaction.editReply({
-                        content: `there was an error deleting the game info. please try again.`,
-                        ephemeral: true 
-                      });
-                      return;
-                }
+                const state = await deleteGame(gameName, client);
+                await interaction.editReply({
+                    content: state,
+                    ephemeral: true
+                });     
+                return;
             }
+            
         }
     }
 }

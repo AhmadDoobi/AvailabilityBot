@@ -1,10 +1,10 @@
 const { SlashCommandBuilder } = require("discord.js");
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
-let teams = JSON.parse(fs.readFileSync('teams.json', 'utf8')).teams;
 const gameChoices = JSON.parse(fs.readFileSync('games.json', 'utf8'));
 const { getDbInfo } = require('../../Functions/get-info-from-db');
 const { checkIfTeamHasAvailability } = require('../../Functions/db-checks')
+const {  getTeamByGuild } = require('../../Functions/get-team-by-guild')
 const db = new sqlite3.Database('info.db', (err) => {
     if (err) {
       console.error('Error opening database:', err.message);
@@ -21,12 +21,6 @@ module.exports = {
                 .setName('game_name')
                 .setDescription('select the game')
                 .addChoices(...gameChoices)
-                .setRequired(true))
-        .addStringOption(option =>
-            option
-                .setName('team_name')
-                .setDescription('select your team')
-                .addChoices(...teams)
                 .setRequired(true))
         .addChannelOption(option =>
             option
@@ -87,11 +81,10 @@ module.exports = {
         })
         const timezone = interaction.options.getString('timezone');
         const gameName = interaction.options.getString('game_name');
-        const teamName = interaction.options.getString('team_name');
         const eventsChannelId = interaction.options.getChannel('channel').id;
         const callerGuildId = interaction.guild.id.toString();
         const callerId = interaction.user.id.toString();
-
+        const { teamName } = await getTeamByGuild(callerGuildId, gameName)
         try {
             const teamInfo = await getDbInfo(gameName, teamName);
             if(!teamInfo){
@@ -110,14 +103,6 @@ module.exports = {
                 content: "there was an error getting the team info. \nif this problem keeps happpning please contact <a7a_.>",
                 ephemeral: true
             });
-            return;
-        }
-
-        if (callerGuildId !== teamGuildId) {
-            await interaction.editReply({
-                content: "you can only set your teams times in the server connected to your team!",
-                ephemeral: true 
-            })
             return;
         }
 

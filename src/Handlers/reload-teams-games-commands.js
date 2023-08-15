@@ -1,25 +1,36 @@
-const { globalCommandsFiles } = require("../Functions/global-commands-loader");
+const { teamsCommandsFiles } = require("../Functions/teams-commands-loader");
+const { gamesCommandsFiles } = require('../Functions/games-commands-loader')
 const ascii = require("ascii-table");
 const path = require('node:path');
 
-async function reloadTeamsAndGamesCommands(client, insideCommand) {
+async function reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands) {
     let state;
-
+    let files;
     const table = new ascii().setHeading("commands", "type", "status");
-
-    for (const [commandName, command] of client.commands.entries()) {
-        if (command.category === 'BotAdmin' && commandName === 'delete-team' || command.category === 'BotAdmin' && commandName === 'games-file') {
-            client.commands.delete(commandName);
+    if (gamesCommands){
+        for (const [commandName, command] of client.commands.entries()) {
+            if (command.category === 'BotAdmin' && commandName === 'delete-team' || command.category === 'BotAdmin' && commandName === 'games-file') {
+                client.commands.delete(commandName);
+            }
+            else if(command.category !== 'BotAdmin') {
+                client.commands.delete(commandName);
+            }
         }
-        else if(command.category !== 'BotAdmin') {
-            client.commands.delete(commandName);
+        files = await gamesCommandsFiles("Commands")
+    } else if (!gamesCommands){
+        for (const [commandName, command] of client.commands.entries()){
+            if (command.category === 'BotAdmin' && commandName === 'delete-team'){
+                client.commands.delete(commandName);
+            } else if (command.category === 'Moderation' || command.category === 'Help') {
+                client.commands.delete(commandName);
+            }
         }
+        files = await teamsCommandsFiles("Commands");
     }
 
     let globalCommandsArray = [];
     let adminCommandsArray = [];
 
-    const files = await globalCommandsFiles("Commands");
 
     files.forEach((file) => {
         const command = require(file);
