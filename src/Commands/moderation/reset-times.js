@@ -102,7 +102,6 @@ module.exports = {
             });
             return;
         }
-        console.log(`${teamName}`)
 
         if (callerId !== captainId && callerId !== coCaptainId) {
             await interaction.editReply({
