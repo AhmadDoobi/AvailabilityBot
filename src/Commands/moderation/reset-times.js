@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, ChannelType } = require("discord.js");
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const gameChoices = JSON.parse(fs.readFileSync('games.json', 'utf8'));
@@ -27,6 +27,7 @@ module.exports = {
             option
                 .setName('channel')
                 .setDescription('the channel for the times messages to be sent in')
+                .addChannelTypes(ChannelType.GuildText)
                 .setRequired(true))
         .addBooleanOption(option =>
             option.setName('monday').setDescription('select if you want monday to be included').setRequired(true))
