@@ -1,47 +1,52 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-async function deleteCachedFile(file) {
-    const filePath = path.resolve(file);
-    if (require.cache[filePath]) {
-        delete require.cache[filePath];
+function deleteCachedFile(itemPath) {
+    if (require.cache[itemPath]) {
+        delete require.cache[itemPath];
     }
 }
 
 function getFiles(folderPath) {
     let files = [];
-    const items = fs.readdirSync(folderPath);
-    
-    for (const item of items) {
-        if (item === '.DS_Store') {
-            continue;
-        }
-        const itemPath = path.join(folderPath, item);
-        const stat = fs.statSync(itemPath);
 
-        if (path.basename(folderPath) === 'BotAdmin' && (item !== 'delete-team.js' && item !== 'games-file.js' && item)) {
-            continue;
-        }
-        if (path.basename(folderPath) === 'Help') {
-            continue;
-        }
+    // Define specific paths to include
+    const includePaths = [
+        'BotAdmin/delete-team.js',
+        'BotAdmin/games-file.js',
+        'Moderation', // Include all files under Moderation
+        'TeamsInfo',  // Include all files under TeamsInfo
+    ];
+
+    includePaths.forEach((includePath) => {
+        const fullPath = path.join(folderPath, includePath);
+        const stat = fs.statSync(fullPath);
 
         if (stat.isDirectory()) {
-            files = files.concat(getFiles(itemPath));
-        } else if (stat.isFile() && item.endsWith('.js')) {
-            files.push(itemPath);
+            // If it's a directory, include all files under it
+            const items = fs.readdirSync(fullPath);
+            items.forEach((item) => {
+                if (item.endsWith('.js')) {
+                    files.push(path.join(fullPath, item));
+                }
+            });
+        } else if (stat.isFile()) {
+            // If it's a file, include it directly
+            files.push(fullPath);
         }
-    }
-    
+    });
+
     return files;
 }
 
-
 async function gamesCommandsFiles() {
     try {
-        const folderPath = path.join(__dirname, '..', 'commands');
+        const folderPath = path.join(__dirname, '..', 'Commands');
         const jsFiles = getFiles(folderPath);
-        await Promise.all(jsFiles.map(deleteCachedFile));
+
+        // Delete cache for the specific files
+        jsFiles.forEach(deleteCachedFile);
+
         return jsFiles;
     } catch (error) {
         console.log(`error loading files ${error}`);
