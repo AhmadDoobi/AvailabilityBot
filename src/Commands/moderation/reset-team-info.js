@@ -13,7 +13,6 @@ const db = new sqlite3.Database('info.db', (err) => {
 const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-teams-games-commands");
 const { getDbInfo } = require('../../Functions/get-info-from-db')
 const { getTeamByGuild } = require('../../Functions/get-team-by-guild');
-const { resolve } = require("path");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -209,7 +208,7 @@ module.exports = {
             reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands);
         };
 
-        if(teamNameUpdated || captainUpdated || coCaptainUpdated) {
+        if(teamNameUpdated) {
             try {
                 const insideCommand = true;
                 const gamesCommands = false;
