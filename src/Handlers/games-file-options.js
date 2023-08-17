@@ -47,6 +47,7 @@ async function deleteGame(gameName, client) {
     let deleteQueryAvailability = `DELETE FROM availability WHERE game_name = ?`;
     let availabilityState;
     let teamsState;
+    let messagesState;
 
     let changes = await new Promise((resolve, reject) => {
         db.run(deleteQueryAvailability, [gameName], function(err) {
@@ -57,7 +58,7 @@ async function deleteGame(gameName, client) {
             }
         });
     });
-    availabilityState = `${changes} rows deleted from game availability`
+    availabilityState = `${changes} rows deleted from availability table`
 
     let deleteQueryTeams = `DELETE FROM teams WHERE game_name = ?`
 
@@ -70,7 +71,20 @@ async function deleteGame(gameName, client) {
             }
         });
     });
-    teamsState = `${changes} rows deleted from teams`
+    teamsState = `${changes} rows deleted from teams table`
+
+    let deleteQueryMessages = `DELETE FROM messages WHERE game_name = ?`
+
+    changes = await new Promise((resolve,reject) => {
+        db.run(deleteQueryMessages, [gameName], function(err) {
+            if(err){
+                reject(err);
+            } else {
+                resolve(this.changes);
+            }
+        });
+    });
+    messagesState = `${changes} rows deleted from messages table`
 
     teamNamesArray.forEach(teamNames => {
         if(teamsJson['games per team name'][teamNames] > 1) {
@@ -88,7 +102,7 @@ async function deleteGame(gameName, client) {
     const gamesCommands = true;
     await reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands)         
 
-    state = (`successfully deleted game \n${teamsState}\n${availabilityState}\nand commands were reloaded`)
+    state = (`successfully deleted game \n${teamsState}\n${availabilityState}\n${messagesState}\nand commands were reloaded`)
     return state;
 }
 
