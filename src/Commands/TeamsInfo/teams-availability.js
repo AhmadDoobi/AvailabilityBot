@@ -2,8 +2,8 @@ const { SlashCommandBuilder } = require("discord.js");
 const fs = require('fs');
 const teams = JSON.parse(fs.readFileSync('teams.json', 'utf8')).teams;
 const gameChoices = JSON.parse(fs.readFileSync('games.json', 'utf8'));
-const { teamsAvailabilityEmbed } = require('../../Embeds/teams-availability')
-const { specificTeamAvailabilityEmbed } = require('../../Embeds/specific-team-availability')
+const { teamsAvailabilityEmbed } = require('../../Embeds/teams-availability-embed')
+const { specificTeamAvailabilityEmbed } = require('../../Embeds/specific-team-availability-embed')
 
 module.exports = {
     data: new SlashCommandBuilder()
