@@ -1,1 +1,5 @@
 .DS_Store
+.env
+info.db
+games.json
+teams.json
