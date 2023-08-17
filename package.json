@@ -1,0 +1,19 @@
+{
+  "name": "availabilitybot",
+  "version": "1.0.0",
+  "description": "A discord bot to help team captains figure out other teams availability to setup scrims and matches.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ascii-table": "^0.0.9",
+    "discord.js": "^14.12.1",
+    "dotenv": "^16.3.1",
+    "node-cron": "^3.0.2",
+    "sqlite3": "^5.1.6"
+  }
+}
