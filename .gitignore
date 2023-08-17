@@ -1,5 +1,5 @@
 .DS_Store
-.env
+dotenv
 info.db
 games.json
 teams.json
