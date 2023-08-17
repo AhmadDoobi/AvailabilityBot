@@ -2,12 +2,12 @@
   "name": "availabilitybot",
   "version": "1.0.0",
   "description": "A discord bot to help team captains figure out other teams availability to setup scrims and matches.",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "a7a_.",
   "license": "ISC",
   "dependencies": {
     "ascii-table": "^0.0.9",

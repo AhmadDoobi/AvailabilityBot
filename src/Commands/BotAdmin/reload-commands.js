@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits} = require('discord.js');
 const { loadCommands } = require('../../Handlers/command-handler')
-const {  } = require('../../Handlers/reload-teams-games-commands')
+const { reloadTeamsAndGamesCommands } = require('../../Handlers/reload-teams-games-commands')
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('reload-commands')
@@ -26,7 +26,36 @@ module.exports = {
 
 			const subcommand = interaction.options.getSubcommand();
 
-
+			switch (subcommand){
+				case 'all-commands': {
+					const startup = false
+					const state = await loadCommands(client, startup)
+					await interaction.editReply({
+						content: state,
+						ephemeral: true
+					})
+				}
+				return;
+				case 'teams-commands': {
+					const insideCommand = false
+					const gamesCommands = false
+					const state = await reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands)
+					await interaction.editReply({
+						content: state,
+						ephemeral: true
+					})
+				}
+				return;
+				case "games-commands":{
+					const insideCommand = false
+					const gamesCommands = true
+					const state = await reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands)
+					await interaction.editReply({
+						content: state,
+						ephemeral: true
+					})
+				}
+			}
 			if (subcommand === 'all-commands'){
 				const startup = false
 				const state = await loadCommands(client, startup)
