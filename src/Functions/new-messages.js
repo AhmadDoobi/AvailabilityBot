@@ -73,31 +73,40 @@ async function scheduleMessagesForTeams(client) {
     // Check the role and send a message 
     if (roleId !== 'not set'){
       try {
-        const oldRolePingMessageId = await getRolePingMessageId();
+        const oldRolePingMessageId = await getRolePingMessageId(gameName, teamName);
         const oldRolePingMessage = await eventsChannel.messages.fetch(oldRolePingMessageId);
         await oldRolePingMessage.delete();
       } catch {} 
 
       const role = eventsChannel.guild.roles.cache.get(roleId);
       if (role && role.mentionable) {
-        const rolePingMessage = await eventsChannel.send(`Hey ${role}, please react to the times you're available in the messages above.`);
+        const rolePingMessage = await eventsChannel.send(`
+        Hey ${role}, please react to the times you're available in the messages above. for game ${gameName}
+        `);
         rolePingMessageId = rolePingMessage.id;
       } else {
-        const warningMessage = await eventsChannel.send("The role you provided is not pingable. Please go to your server settings/roles/your team member role/ enable 'allow anyone to @mention this role'.");
+        const warningMessage = await eventsChannel.send(`
+        hey, please react to the times your available in the messages above for game ${gameName}\n
+        The role you provided is not pingable. Please go to your server settings/roles/your team member role/ enable 'allow anyone to @mention this role'.
+        `);
         rolePingMessageId = warningMessage.id;
       }
-        // Update the message ID in the database for the 'team member role message' day
-        await new Promise((resolve, reject) => {
-        db.run(
-          "UPDATE messages SET message_id = ? WHERE game_name = ? AND team_name = ? AND day = 'team member role message'",
-          [rolePingMessageId, gameName, teamName],
-          (err) => {
-            if (err) reject(err);
-            else resolve();
-          }
-        );
-      });
-    } else if (roleId === 'not set'){rolePingMessageId = roleId};
+    } else if (roleId === 'not set'){
+      rolePingMessageId = await eventsChannel.send(`
+        hey, please react to the times your available in the messages above for game ${gameName}
+        `).id
+    };
+    // Update the message ID in the database for the 'team member role message' day
+    await new Promise((resolve, reject) => {
+      db.run(
+        "UPDATE messages SET message_id = ? WHERE game_name = ? AND team_name = ? AND day = 'team member role message'",
+        [rolePingMessageId, gameName, teamName],
+        (err) => {
+        if (err) reject(err);
+        else resolve();
+        }
+      );
+    });
   }
 }
 
