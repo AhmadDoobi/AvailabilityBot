@@ -13,8 +13,8 @@ async function helpEmbed(){
         .setDescription('here are the bot commands to help you get started.')
         .addFields(
             { 
-                name: '⚠️ Important note:', 
-                value: 'make sure the bot has permission to send measages and react to them in the channel where you want the times measage to be sent in, and all other channels you want to use the bot in, also if you want the bot to ping the team members role make sure the role is ping able' },
+                name: '⚠️ Important notes:', 
+                value: 'make sure the bot has permission to send measages and react to them in the channel where you want the times measage to be sent in, also if you want the bot to ping the team members role make sure the role is ping able, finally make sure you register your team in your teams server' },
             { 
                 name: '-------------------------------------', 
                 value: '-------------------------------------' },
