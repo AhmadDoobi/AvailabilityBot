@@ -125,7 +125,7 @@ module.exports = {
         }
 
         const daysArray = [];
-        
+
         if (interaction.options.getBoolean('monday')) daysArray.push('monday');
         if (interaction.options.getBoolean('tuesday')) daysArray.push('tuesday');
         if (interaction.options.getBoolean('wednesday')) daysArray.push('wednesday');
@@ -137,7 +137,7 @@ module.exports = {
         // Check if the daysArray is empty
         if (daysArray.length === 0) {
             await interaction.editReply({
-                content: 'You must at least have one day chosen.',
+                content: 'error, You must at least have one day chosen.',
                 ephemeral: true
             });
             return; // Exit the command execution if no days were chosen
