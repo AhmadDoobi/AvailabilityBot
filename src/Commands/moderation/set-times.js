@@ -148,10 +148,10 @@ module.exports = {
             const role = interaction.options.getRole('team_members_role')
             let rolePingMessageId = "";
             if (role.mentionable) {
-                const rolePingMessage = await eventsChannel.send(`Hey ${role}, please react to the times you're available in the messages below`);
+                const rolePingMessage = await eventsChannel.send(`Hey ${role}, please react to the times you're available in the messages below for game ${gameName}`);
                 rolePingMessageId = rolePingMessage.id;
             } else {
-                const warningMessage = await eventsChannel.send('The role you provided is not pingable. Please go to your server settings/roles/your team member role/ enable "allow anyone to @mention this role"');
+                const warningMessage = await eventsChannel.send(`Hey, please react to the times you're available in the messages below for game ${gameName}. \nThe role you provided is not pingable. Please go to your server settings/roles/your team member role/ enable "allow anyone to @mention this role"`);
                 rolePingMessageId = warningMessage.id;
             }
             let insertQuery = `
@@ -194,8 +194,12 @@ module.exports = {
             }
 
         } else {
+            let rolePingMessageId = "";
             const teamMemberRoleId = "not set";
             try {
+                const rolePingMessage = await eventsChannel.send(`Hey, please react to the times you're available in the messages below for game ${gameName}.`);
+                rolePingMessageId = rolePingMessage.id
+                console.log(rolePingMessageId)
                 await new Promise((resolve, reject) => {
                     db.run(updateQuery, [eventsChannelId, teamMemberRoleId, timezone, gameName, teamName], function(err) {
                     if (err) {
@@ -206,6 +210,26 @@ module.exports = {
                     }
                     });
                 });
+
+                let insertQuery = `
+                INSERT INTO messages (
+                team_name,
+                game_name,
+                day,
+                message_id
+                )
+                VALUES (?, ?, 'team member role message', ?);
+            `;
+            await new Promise((resolve, reject) => {
+                db.run(insertQuery, [teamName, gameName, rolePingMessageId], function (err) {
+                if (err) {
+                    reject(`There was an error adding messages: ${err.message}`);
+                } else {
+                    resolve();
+                }
+                });
+            });
+
             } catch (error) {
                 console.log(`there was an error adding a team, ${error}`)
                 await interaction.editReply({

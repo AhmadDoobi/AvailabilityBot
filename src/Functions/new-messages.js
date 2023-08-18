@@ -70,14 +70,14 @@ async function scheduleMessagesForTeams(client) {
     };
 
     let rolePingMessageId;
+    try {
+      const oldRolePingMessageId = await getRolePingMessageId(gameName, teamName);
+      const oldRolePingMessage = await eventsChannel.messages.fetch(oldRolePingMessageId);
+      await oldRolePingMessage.delete();
+    } catch {} 
+    
     // Check the role and send a message 
     if (roleId !== 'not set'){
-      try {
-        const oldRolePingMessageId = await getRolePingMessageId(gameName, teamName);
-        const oldRolePingMessage = await eventsChannel.messages.fetch(oldRolePingMessageId);
-        await oldRolePingMessage.delete();
-      } catch {} 
-
       const role = eventsChannel.guild.roles.cache.get(roleId);
       if (role && role.mentionable) {
         const rolePingMessage = await eventsChannel.send(`
@@ -92,11 +92,10 @@ async function scheduleMessagesForTeams(client) {
         rolePingMessageId = warningMessage.id;
       }
     } else if (roleId === 'not set'){
-      const message = await eventsChannel.send(`
+      const rolePingMessage = await eventsChannel.send(`
         hey, please react to the times your available in the messages above for game ${gameName}
         `);
-      rolePingMessageId = message.id;
-    };
+      rolePingMessageId = rolePingMessage.id}
     // Update the message ID in the database for the 'team member role message' day
     await new Promise((resolve, reject) => {
       db.run(
