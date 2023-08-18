@@ -92,9 +92,10 @@ async function scheduleMessagesForTeams(client) {
         rolePingMessageId = warningMessage.id;
       }
     } else if (roleId === 'not set'){
-      rolePingMessageId = await eventsChannel.send(`
+      const message = await eventsChannel.send(`
         hey, please react to the times your available in the messages above for game ${gameName}
-        `).id
+        `);
+      rolePingMessageId = message.id;
     };
     // Update the message ID in the database for the 'team member role message' day
     await new Promise((resolve, reject) => {
