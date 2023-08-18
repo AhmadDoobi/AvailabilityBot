@@ -124,6 +124,8 @@ module.exports = {
             return;
         }
 
+        const daysArray = [];
+        
         if (interaction.options.getBoolean('monday')) daysArray.push('monday');
         if (interaction.options.getBoolean('tuesday')) daysArray.push('tuesday');
         if (interaction.options.getBoolean('wednesday')) daysArray.push('wednesday');
@@ -237,7 +239,6 @@ module.exports = {
         const fromHour = interaction.options.getInteger('from_hour');
         const toHour = interaction.options.getInteger('to_hour');
         
-        const daysArray = [];
         const timesArray = [];
 
         for (hour = fromHour; hour <= toHour; hour++){
