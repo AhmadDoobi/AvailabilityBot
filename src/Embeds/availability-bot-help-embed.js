@@ -46,12 +46,6 @@ async function helpEmbed(){
             { 
                 name: 'teams-availability specific-team', 
                 value: "type 'teams-availability specific-team' then fill in the game for the team you want to check then the team name followed by the day to check in, this will display all the hours in the chosen day under each hour it'll show how many available players the chosen team has. " },
-            { 
-                name: '-------------------------------------', 
-                value: '\u200b' },
-            { 
-                name: 'match-setup', 
-                value: 'still under devolpment' }
         )
         .setTimestamp()
         .setFooter({text: 'made by "a7a_." ', iconURL: botOwnerImage})
