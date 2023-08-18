@@ -81,6 +81,7 @@ module.exports = {
             content: 'processing...',
             ephemeral: true
         })
+        
         const timezone = interaction.options.getString('timezone');
         const gameName = interaction.options.getString('game_name');
         const eventsChannel = interaction.options.getChannel('channel');
@@ -96,6 +97,7 @@ module.exports = {
             });
                 eturn;
         }
+
         teamGuildId = teamInfo.guildId;
         captainId = teamInfo.captainId;
         coCaptainId = teamInfo.coCaptainId;
@@ -116,7 +118,24 @@ module.exports = {
             });
             return;
         }
-        
+
+        if (interaction.options.getBoolean('monday')) daysArray.push('monday');
+        if (interaction.options.getBoolean('tuesday')) daysArray.push('tuesday');
+        if (interaction.options.getBoolean('wednesday')) daysArray.push('wednesday');
+        if (interaction.options.getBoolean('thursday')) daysArray.push('thursday');
+        if (interaction.options.getBoolean('friday')) daysArray.push('friday');
+        if (interaction.options.getBoolean('saturday')) daysArray.push('saturday');
+        if (interaction.options.getBoolean('sunday')) daysArray.push('sunday');
+
+        // Check if the daysArray is empty
+        if (daysArray.length === 0) {
+            await interaction.editReply({
+                content: 'You must at least have one day chosen.',
+                ephemeral: true
+            });
+            return; // Exit the command execution if no days were chosen
+        }
+
         const updateQuery = `
             UPDATE teams 
             SET
@@ -206,14 +225,6 @@ module.exports = {
         for (hour = fromHour; hour <= toHour; hour++){
             timesArray.push(hour)
         }
-
-        if (interaction.options.getBoolean('monday')) daysArray.push('monday');
-        if (interaction.options.getBoolean('tuesday')) daysArray.push('tuesday');
-        if (interaction.options.getBoolean('wednesday')) daysArray.push('wednesday');
-        if (interaction.options.getBoolean('thursday')) daysArray.push('thursday');
-        if (interaction.options.getBoolean('friday')) daysArray.push('friday');
-        if (interaction.options.getBoolean('saturday')) daysArray.push('saturday');
-        if (interaction.options.getBoolean('sunday')) daysArray.push('sunday');
 
         for (let day of daysArray) {
             for (let hour of timesArray) {
