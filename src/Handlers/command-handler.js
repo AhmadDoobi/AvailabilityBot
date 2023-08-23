@@ -61,7 +61,8 @@ async function loadCommands(client, startup) {
     }
 
     if (startup){
-        return console.log(table.toString(), "\nCommands Loaded")
+        console.log(table.toString(), "\nCommands Loaded")
+        return state
     } else {
         console.log(table.toString(), "\nCommands Reloaded")
         return state
@@ -69,4 +70,3 @@ async function loadCommands(client, startup) {
 }
 
 module.exports = { loadCommands };
-

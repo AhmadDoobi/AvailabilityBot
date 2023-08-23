@@ -81,20 +81,16 @@ async function scheduleMessagesForTeams(client) {
       const role = eventsChannel.guild.roles.cache.get(roleId);
       if (role && role.mentionable) {
         const rolePingMessage = await eventsChannel.send(`
-        Hey ${role}, please react to the times you're available in the messages above. for game ${gameName}
-        `);
+        Hey ${role}, please react to the times you're available in the messages above. for game ${gameName}`);
         rolePingMessageId = rolePingMessage.id;
       } else {
         const warningMessage = await eventsChannel.send(`
-        hey, please react to the times your available in the messages above for game ${gameName}\n
-        The role you provided is not pingable. Please go to your server settings/roles/your team member role/ enable 'allow anyone to @mention this role'.
-        `);
+        hey, please react to the times your available in the messages above for game ${gameName}`);
         rolePingMessageId = warningMessage.id;
       }
     } else if (roleId === 'not set'){
       const rolePingMessage = await eventsChannel.send(`
-        hey, please react to the times your available in the messages above for game ${gameName}
-        `);
+        hey, please react to the times your available in the messages above for game ${gameName}`);
       rolePingMessageId = rolePingMessage.id}
     // Update the message ID in the database for the 'team member role message' day
     await new Promise((resolve, reject) => {
