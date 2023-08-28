@@ -224,28 +224,27 @@ module.exports = {
         if (!coCaptainUpdated){
             coCaptainUpdated = "";
         }
+        if (!teamNameUpdated){
+            teamNameUpdated = '';
+        }
 
-        if(updated > 0 ) {
-            const gamesCommands = false;
-            const insideCommand = true;
-            reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands);
-        };
-
-        if(teamNameUpdated) {
-            try {
+        if(updated > 0) {
+            if (teamNameUpdated){            
+                try {
                 const insideCommand = true;
                 const gamesCommands = false;
                 await reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands) 
-            } catch(error){
-                console.log(error)
-                await interaction.editReply({
-                  content: `${teamNameUpdated}, \n${captainUpdated}, \n${coCaptainUpdated}.\n❌❌❌ But there was an error reloading the commands, please contact <a7a_.>.`,
-                  ephemeral: true 
+                } catch(error){
+                    console.log(error)
+                    await interaction.editReply({
+                    content: `${teamNameUpdated}, \n${captainUpdated}, \n${coCaptainUpdated}.\n❌❌❌ But there was an error reloading the commands, please contact <a7a_.>.`,
+                    ephemeral: true 
                 });
                 return;
               }
-              await interaction.editReply({
-                content: `${teamNameUpdated}, \n${captainUpdated}, \n${coCaptainUpdated}.`,
+            }
+            await interaction.editReply({
+                content: `${teamNameUpdated} \n${captainUpdated} \n${coCaptainUpdated}`,
                 ephemeral: true
             });
         } else {
