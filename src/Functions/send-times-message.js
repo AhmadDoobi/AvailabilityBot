@@ -26,6 +26,9 @@ async function sendMessageAndStoreId(eventsChannel, day, hours) {
           await message.react(emoji);
       }
   }
+  await message.react("❌")
+  await message.react("🤷")
+
 
   return messageId;
 }

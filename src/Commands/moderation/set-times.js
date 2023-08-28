@@ -70,6 +70,7 @@ module.exports = {
                     {name: 'bst', value: 'bst'},
                     {name: 'est', value: 'est'},
                     {name: 'gmt', value: 'gmt'},
+                    {name: 'pst', value: 'pst'},
                 ))  
         .addRoleOption(option =>
             option
@@ -151,7 +152,7 @@ module.exports = {
                 const rolePingMessage = await eventsChannel.send(`Hey ${role}, please react to the times you're available in the messages below for game ${gameName}`);
                 rolePingMessageId = rolePingMessage.id;
             } else {
-                const warningMessage = await eventsChannel.send(`Hey, please react to the times you're available in the messages below for game ${gameName}. \nThe role you provided is not pingable. Please go to your server settings/roles/your team member role/ enable "allow anyone to @mention this role"`);
+                const warningMessage = await eventsChannel.send(`Hey, please react to the times you're available in the messages below for game ${gameName}. \nThe role you provided is not pingable. Please go to your server settings/roles/your team member role/ enable "allow anyone to @mention this role, or give the bot administrator permission "`);
                 rolePingMessageId = warningMessage.id;
             }
             let insertQuery = `
@@ -292,7 +293,7 @@ module.exports = {
             });
         }
         await interaction.editReply({
-            content:`Successfully set the following days:\n${daysArray.join(", ")}\n\nAnd times:\n${timesArray.join(", ")}`,
+            content:`Successfully set the following days:\n${daysArray.join(", ")}\n\nAnd times:\n${timesArray.join(", ")}.\n\ntimezone was set to ${timezone}. for team ${teamName}`,
             ephemeral: true
         });
     }

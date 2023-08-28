@@ -156,7 +156,6 @@ module.exports = {
                                 reject(`There was an error updating the team: ${teamName} ${err.message}`);
                             } else {
                                 resolve(
-                                    teamNameUpdated = `team name updated in teams table to ${newTeamName}\n`,
                                     updated += 1
                                 );
                             }
@@ -173,7 +172,22 @@ module.exports = {
                                 reject(`There was an error updating the team: ${teamName} ${err.message}`);
                             } else {
                                 resolve(
-                                    teamNameUpdated += `team name updated in availability table to ${newTeamName}`,
+                                    updated += 1
+                                );
+                            }
+                        });
+                    });
+
+                    await new Promise((resolve, reject) => {
+                        let sql = `UPDATE messages
+                                    SET team_name = ?
+                                    WHERE team_name = ? AND game_name = ?`;
+                        
+                        db.run(sql, [newTeamName, teamName, gameName], function(err) {
+                            if (err) {
+                                reject(`There was an error updating the team: ${teamName} ${err.message}`);
+                            } else {
+                                resolve(
                                     updated += 1
                                 );
                             }
@@ -195,11 +209,20 @@ module.exports = {
                     }
 
                     fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
+
+                    teamNameUpdated = `updated the team name to ${newTeamName}`
                 } catch (error) {
                     console.error("error trying to update the new team name: ", error);
                     teamNameUpdated += '\nsomething went wrong while updating the team name';
                 }
             }
+        }
+
+        if (!captainUpdated){
+            captainUpdated = "";
+        }
+        if (!coCaptainUpdated){
+            coCaptainUpdated = "";
         }
 
         if(updated > 0 ) {
