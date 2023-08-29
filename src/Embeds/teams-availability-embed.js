@@ -48,7 +48,7 @@ async function teamsAvailabilityEmbed(gameName, amountOfPlayers) {
                     const teamName = availability.team_name;
                     const hoursCount = availability.hours_count;
                     const timezone = await getTeamTimeZone(teamName, gameName);
-                    dayValue += `${teamName}: in ${hoursCount} hours /timezone ${timezone}\n`;
+                    dayValue += `${teamName}: ${hoursCount} time slots available /timezone ${timezone}\n`;
                 }
 
                 embed.addFields({ name: day, value: dayValue });
