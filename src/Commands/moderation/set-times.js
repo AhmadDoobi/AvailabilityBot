@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChannelType } = require("discord.js");
+const { SlashCommandBuilder, ChannelType, PermissionFlagsBits } = require("discord.js");
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const gameChoices = JSON.parse(fs.readFileSync('games.json', 'utf8'));
@@ -77,7 +77,7 @@ module.exports = {
                 .setName('team_members_role')
                 .setDescription('if you dont want the bot to ping the role leave empty')
                 .setRequired(false)),
-    async execute(interaction) {
+    async execute(interaction, client) {
         await interaction.reply({
             content: 'processing...',
             ephemeral: true
@@ -119,6 +119,14 @@ module.exports = {
             });
             return;
         }
+
+        const botPermissions = eventsChannel.permissionsFor(client.user);
+        const requiredPermissions = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages | PermissionFlagsBits.AddReactions;
+
+        if (!botPermissions.has(requiredPermissions)) {
+            return interaction.editReply(`I do not have the required permissions (View, Send, React) in the channel: ${eventsChannel.name}`);
+        }
+
         const daysArray = [];
         if (interaction.options.getBoolean('monday')) daysArray.push('monday');
         if (interaction.options.getBoolean('tuesday')) daysArray.push('tuesday');

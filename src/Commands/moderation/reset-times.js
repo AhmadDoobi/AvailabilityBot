@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChannelType, Client } = require("discord.js");
+const { SlashCommandBuilder, ChannelType, PermissionFlagsBits } = require("discord.js");
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const gameChoices = JSON.parse(fs.readFileSync('games.json', 'utf8'));
@@ -123,6 +123,13 @@ module.exports = {
                 ephemeral: true
             });
             return;
+        }
+
+        const botPermissions = eventsChannel.permissionsFor(Client.user);
+        const requiredPermissions = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages | PermissionFlagsBits.AddReactions;
+
+        if (!botPermissions.has(requiredPermissions)) {
+            return interaction.editReply(`I do not have the required permissions (View, Send, React) in the channel: ${eventsChannel.name}`);
         }
 
         const daysArray = [];
