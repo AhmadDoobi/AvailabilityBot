@@ -1,11 +1,12 @@
 const { loadCommands } = require("../../Handlers/command-handler")
-
+const { cacheMessages } = require('../../Functions/cache-messages')
 module.exports = {
 	name: "ready",
 	once: true,
-	execute(client) {
+	async execute(client) {
 		console.log(`your bot is online!. Logged in as ${client.user.tag}`);
 		const startup = true 
-		loadCommands(client, startup);
+		await loadCommands(client, startup);
+		await cacheMessages(client);
 	},
 };
