@@ -74,6 +74,7 @@ module.exports = {
                     {name: 'est', value: 'est'},
                     {name: 'gmt', value: 'gmt'},
                     {name: 'pst', value: 'pst'},
+                    {name: 'cet', value: 'cet'},
                 ))    
         .addRoleOption(option =>
             option
