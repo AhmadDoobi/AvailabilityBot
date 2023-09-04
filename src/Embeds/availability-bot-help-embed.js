@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const adminGuildUrl = process.env.ADMIN_GUILD_URL;
 const botImage = process.env.BOT_IMAGE_URL;
-botOwnerImage = process.env.BOT_OWNER_IMAGE;
+const botOwnerImage = process.env.BOT_OWNER_IMAGE;
 async function helpEmbed(){
     const embed = new EmbedBuilder()
         .setTitle('AvailabilityBot Help')

@@ -1,4 +1,9 @@
 const { EmbedBuilder } = require('discord.js');
+const dotenv = require("dotenv");
+dotenv.config();
+const adminGuildUrl = process.env.ADMIN_GUILD_URL;
+const botImage = process.env.BOT_IMAGE_URL;
+const botOwnerImage = process.env.BOT_OWNER_IMAGE;
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('info.db', (err) => {
     if (err) {
@@ -39,7 +44,15 @@ async function getHourAvailability(gameName, teamName, day, hour) {
 
 async function specificTeamAvailabilityEmbed(gameName, teamName, day){
     const timezone = await getTeamTimeZone(teamName, gameName);
-    const embed = new EmbedBuilder().setTitle(`${teamName}`).setDescription(`${day} availability / team timezone ${timezone}.`);
+    const embed = new EmbedBuilder()
+      .setTitle(`AvailabilityBot team availability check`)
+      .setDescription(`${day} availability for team: ${teamName}/ team timezone: ${timezone}.`)
+      .setAuthor({name: 'AvailabilityBot', iconURL: botImage, url: adminGuildUrl})
+      .setColor('#10185a')
+      .setURL(adminGuildUrl)
+      .setTimestamp()
+      .setFooter({text: 'made by "a7a_." ', iconURL: botOwnerImage});
+
     const hours = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
 
     let availableHours = 0;
@@ -56,12 +69,12 @@ async function specificTeamAvailabilityEmbed(gameName, teamName, day){
     }
     if (availableHours < 12 && availableHours > 0) {
       embed.addFields(
-        { name: '\u200B', value: '\u200B' },
+        { name: '-------------------------------------', value: '\u200B' },
         {name:'done', value: `no available players for the rest of the day`}
       )
     } else if (availableHours < 1){
       embed.addFields(
-        { name: '\u200B', value: '\u200B' },
+        { name: '-------------------------------------', value: '\u200B' },
         {name:'done', value: `no available players for the whole day!`}
       )
     }

@@ -1,4 +1,9 @@
 const { EmbedBuilder } = require('discord.js');
+const dotenv = require("dotenv");
+dotenv.config();
+const adminGuildUrl = process.env.ADMIN_GUILD_URL;
+const botImage = process.env.BOT_IMAGE_URL;
+const botOwnerImage = process.env.BOT_OWNER_IMAGE;
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('info.db', (err) => {
     if (err) {
@@ -32,7 +37,15 @@ async function getDayAvailability(gameName, day, amountOfPlayers) {
 }
 
 async function teamsAvailabilityEmbed(gameName, amountOfPlayers) {
-    const embed = new EmbedBuilder().setTitle(`all teams`).setDescription(`Teams that have ${amountOfPlayers} or more players available`);
+    const embed = new EmbedBuilder()
+        .setTitle(`AvailabilityBot all teams availability check`)
+        .setDescription(`Teams that have ${amountOfPlayers} or more players available`)
+        .setAuthor({name: 'AvailabilityBot', iconURL: botImage, url: adminGuildUrl})
+        .setColor('#283cf0')
+        .setURL(adminGuildUrl)
+        .setTimestamp()
+        .setFooter({text: 'made by "a7a_." ', iconURL: botOwnerImage});
+
     let daysWithTeams = 0
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -59,12 +72,12 @@ async function teamsAvailabilityEmbed(gameName, amountOfPlayers) {
         }
         if (daysWithTeams > 0 && daysWithTeams < 7){
             embed.addFields(
-                { name: '\u200b', value: '\u200b' },
+                { name: '-------------------------------------', value: '\u200b' },
                 {name:'done', value: `no teams have ${amountOfPlayers} or more players available for the rest of the week!`}
             )
         } else if (daysWithTeams < 1){
             embed.addFields(
-                { name: '\u200B', value: '\u200B' },
+                { name: '-------------------------------------', value: '\u200B' },
                 {name:'done', value: `no teams have ${amountOfPlayers} or more players available for the whole week yet!`}
             )
         }
