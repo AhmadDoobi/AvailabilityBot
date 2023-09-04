@@ -7,21 +7,28 @@ const db = new sqlite3.Database('info.db', (err) => {
 const { sendMessageAndStoreId } = require('./send-times-message');
 const { deleteTimesMessages } = require('./delete-times-messages');
 const { resetAvailablePlayers } = require('./reset-available-players');
+const { PermissionFlagsBits } = require('discord.js');
 
 async function scheduleMessagesForTeams(client) {
   const teamsAndGames = await new Promise((resolve, reject) => {
-    db.all("SELECT team_name, game_name, teamMember_roleId, events_channelId FROM teams", (err, rows) => {
+    db.all("SELECT team_name, game_name, teamMember_roleId, events_channelId, captain_userId FROM teams", (err, rows) => {
       if (err) reject(err);
       else resolve(rows);
     });
   });
 
-  for (const { team_name: teamName, game_name: gameName, teamMember_roleId: roleId, events_channelId: channelId } of teamsAndGames) {
+  for (const { team_name: teamName, game_name: gameName, teamMember_roleId: roleId, events_channelId: channelId, captain_userId: captainId } of teamsAndGames) {
+    if (channelId === 'not set') {continue;} 
     const eventsChannel = client.channels.cache.get(channelId);
-    if (!eventsChannel) {
-      console.error(`Channel with ID ${channelId} not found`);
-      continue;
-    }
+    if (!eventsChannel) {continue;}
+    const botPermissions = eventsChannel.permissionsFor(client.user);
+    const requiredPermissions = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages | PermissionFlagsBits.AddReactions;
+    if (!botPermissions.has(requiredPermissions)) {
+      try{
+        teamCaptain = client.users.cache.get(captainId);
+        await teamCaptain.send(`I do not have the required permissions (View, Send, React) in the channel: ${eventsChannel.name}`);
+      } catch {} finally {continue;}
+    };
 
     const availability = await new Promise((resolve, reject) => {
       db.all(
@@ -104,6 +111,7 @@ async function scheduleMessagesForTeams(client) {
       );
     });
   }
+  return;
 }
 
 module.exports = {scheduleMessagesForTeams};
