@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { cacheMessages } = require('../../Functions/cache-messages');
 
 module.exports = {
