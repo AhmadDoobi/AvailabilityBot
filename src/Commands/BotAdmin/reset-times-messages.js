@@ -13,7 +13,7 @@ module.exports = {
         })
         await scheduleMessagesForTeams(client);
         await interaction.editReply({
-            content: 'reseted all times messages!',
+            content: 'Successfully reseted all times messages!',
             ephemeral: true
         })
     }
