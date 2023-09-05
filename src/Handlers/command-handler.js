@@ -1,6 +1,9 @@
 const { loadFiles } = require("../Functions/files-loader");
 const ascii = require("ascii-table");
 const path = require('node:path');
+const dotenv = require("dotenv");
+dotenv.config();
+const adminGuildId = process.env.ADMIN_GUILD_ID;
 
 async function loadCommands(client, startup) {
     let state;
@@ -46,13 +49,14 @@ async function loadCommands(client, startup) {
         }
     })
 
+
+    
     if (globalCommandsArray || adminCommandsArray){
         // Globally set all non-admin commands
         client.application.commands.set(globalCommandsArray);
 
         // Set admin commands to the admin guild
-        const guildId = '1131204470274019368';
-        const guild = client.guilds.cache.get(guildId);
+        const guild = client.guilds.cache.get(adminGuildId);
         guild.commands.set(adminCommandsArray);
 
         state += 'rest of the commands successfully reloaded!'
@@ -62,7 +66,8 @@ async function loadCommands(client, startup) {
 
     if (startup){
         console.log(table.toString(), "\nCommands Loaded")
-        return state
+        state = "";
+        return
     } else {
         console.log(table.toString(), "\nCommands Reloaded")
         return state
