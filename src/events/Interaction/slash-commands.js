@@ -11,5 +11,6 @@ module.exports = {
 		}
 
 		command.execute(interaction, client);
+		return;
     }
 }
