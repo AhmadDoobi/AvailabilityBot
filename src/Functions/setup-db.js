@@ -76,6 +76,7 @@ async function setupDatabase() {
             console.log('Closed the database connection. on setup-db.js');
         });
     }
+    return; 
 }
 
 module.exports = {setupDatabase}
