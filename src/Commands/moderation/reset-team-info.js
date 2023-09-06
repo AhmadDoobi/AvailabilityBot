@@ -3,11 +3,6 @@ const fs = require('fs');
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('info.db', (err) => {
-    if (err) {
-      console.error('Error opening database:', err.message);
-    }
-});
 const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-teams-games-commands");
 const { getDbInfo } = require('../../Functions/get-info-from-db');
 const { getTeamByGuild } = require('../../Functions/get-team-by-guild');
@@ -43,7 +38,14 @@ module.exports = {
         await interaction.reply({
             content: 'processing...',
             ephemeral: true
-        })
+        });
+
+        const db = new sqlite3.Database('info.db', (err) => {
+            if (err) {
+              console.error('Error opening database:', err.message);
+            }
+        });
+
         const gameName = interaction.options.getString('game_name');
         const callerGuildId = interaction.guild.id.toString();
         const { teamName } = await getTeamByGuild(callerGuildId, gameName);
@@ -87,7 +89,7 @@ module.exports = {
 
         const logEmbed = new EmbedBuilder()
             .setColor('#013220')
-            .setDescription(`team: ${teamName} reset their info for game: ${gameName}`);
+            .setDescription(`team ${teamName} for game ${gameName} has reset their info`);
             
         if(interaction.options.getUser('new_team_captain')) {
             const newCaptainId = interaction.options.getUser('new_team_captain').id.toString();
@@ -198,20 +200,22 @@ module.exports = {
                     const teamsJson = JSON.parse(fs.readFileSync('teams.json', 'utf8'));
                     const { teams, "games per team name": gamesPerTeamName } = teamsJson;
                     
+                    // Do all the updates first
                     if (gamesPerTeamName[teamName] <= 1) {
                         delete gamesPerTeamName[teamName];
-                        teamsJson.teams = teams.filter(team => team.name !== teamName);
+                            teamsJson.teams = teams.filter(team => team.name !== teamName);
                     } else {
                         gamesPerTeamName[teamName]--;
                     }
 
                     if (teams.some(team => team.name === newTeamName)) {
-                        gamesPerTeamName[newTeamName]++;
+                            gamesPerTeamName[newTeamName]++;
                     } else {
                         teamsJson.teams.push({ name: newTeamName, value: newTeamName });
                         gamesPerTeamName[newTeamName] = 1;
                     }
 
+                    // Write all the changes at once
                     fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
 
                     teamNameUpdated = `updated the team name to ${newTeamName}`
@@ -253,7 +257,8 @@ module.exports = {
                 content: `${teamNameUpdated} \n${captainUpdated} \n${coCaptainUpdated}`,
                 ephemeral: true
             });
-            return await sendLog(client, logEmbed)
+            await sendLog(client, logEmbed);
+            return;
         } else {
             await interaction.editReply({
                 content: "nothing to update here, if this is a mistake please contact <a7a_.>.",
@@ -261,6 +266,13 @@ module.exports = {
             });
             logEmbed.addFields({name: "nothing updated", value: ""})
             await sendLog(client, logEmbed);
+
+            db.close((err) => {
+                if (err) {
+                    console.error('Error closing the database:', err.message);
+                }
+            });
+
             return;
 
         }     
