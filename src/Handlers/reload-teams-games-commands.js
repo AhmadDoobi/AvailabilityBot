@@ -17,9 +17,9 @@ async function reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands)
     for (const [commandName, command] of client.commands.entries()) {
         if (gamesCommands ? 
             (command.category === 'BotAdmin' && ['delete-team', 'games-file'].includes(commandName)) ||
-            ['Moderation', 'MatchSetup', 'TeamsInfo'].includes(command.category) :
+            ['Moderation', 'TeamsInfo'].includes(command.category) :
             (command.category === 'BotAdmin' && commandName === 'delete-team') ||
-            ['TeamsInfo', 'MatchSetup'].includes(command.category)) {
+            ['TeamsInfo'].includes(command.category)) {
 
             // Delete from bot's internal collection
             client.commands.delete(commandName);

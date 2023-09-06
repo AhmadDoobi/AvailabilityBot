@@ -10,12 +10,11 @@ function deleteCachedFile(itemPath) {
 function getFiles(folderPath) {
     let files = [];
 
-    // Define specific paths to include
     const includePaths = [
         'BotAdmin/delete-team.js',
         'BotAdmin/games-file.js',
-        'Moderation', // Include all files under Moderation
-        'TeamsInfo',  // Include all files under TeamsInfo
+        'Moderation',
+        'TeamsInfo', 
     ];
 
     includePaths.forEach((includePath) => {

@@ -14,7 +14,6 @@ function getFiles(folderPath) {
     const includePaths = [
         'BotAdmin/delete-team.js',
         'TeamsInfo',
-        'MatchSetup',
     ];
 
     includePaths.forEach((includePath) => {
