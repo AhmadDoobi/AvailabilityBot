@@ -1,7 +1,5 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const fs = require('fs');
-const teamsJson = JSON.parse(fs.readFileSync('teams.json', 'utf8'));
-const { teams, "games per team name": gamesPerTeamName } = teamsJson;
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
 const sqlite3 = require('sqlite3').verbose();
@@ -11,8 +9,9 @@ const db = new sqlite3.Database('info.db', (err) => {
     }
 });
 const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-teams-games-commands");
-const { getDbInfo } = require('../../Functions/get-info-from-db')
+const { getDbInfo } = require('../../Functions/get-info-from-db');
 const { getTeamByGuild } = require('../../Functions/get-team-by-guild');
+const { sendLog } = require('../../Functions/bot-log-message');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -46,16 +45,11 @@ module.exports = {
             ephemeral: true
         })
         const gameName = interaction.options.getString('game_name');
-        const newTeamName = interaction.options.getString('new_team_name');
         const callerGuildId = interaction.guild.id.toString();
         const { teamName } = await getTeamByGuild(callerGuildId, gameName);
         const callerId = interaction.user.id.toString();
         let captainId;
         let coCaptainId;
-        let captainUpdated;
-        let coCaptainUpdated;
-        let teamNameUpdated;
-        let updated = 0
 
         try {
             const teamInfo = await getDbInfo(gameName, teamName);
@@ -73,19 +67,28 @@ module.exports = {
 
         if (!teamName) {
             await interaction.editReply({
-                content: "you didn't register a team with the given game to you'r server yet! \nplease use /register-team",
+                content: "you didn't register a team with the given game to your server yet! \nplease use /register-team",
                 ephemeral: true 
             })
             return;
-        }
+        };
         if (callerId !== captainId && callerId !== coCaptainId) {
             await interaction.editReply({
                 content: "you need to be the team captain or co captain to change its info!",
                 ephemeral: true
             });
             return;
-        }
+        };
 
+        let captainUpdated;
+        let coCaptainUpdated;
+        let teamNameUpdated;
+        let updated = 0
+
+        const logEmbed = new EmbedBuilder()
+            .setColor('#013220')
+            .setDescription(`team: ${teamName} reset their info for game: ${gameName}`);
+            
         if(interaction.options.getUser('new_team_captain')) {
             const newCaptainId = interaction.options.getUser('new_team_captain').id.toString();
             const newCaptainUsername = interaction.options.getUser('new_team_captain').username;
@@ -106,6 +109,8 @@ module.exports = {
                         }
                       });
                     });
+
+                    logEmbed.addFields({name: `new team captain`, value: newCaptainUsername})
                 } catch (error) {
                     console.error("error trying to update the new team captain: ", error);
                     captainUpdated = 'something went wrong while updating the team captain';
@@ -135,6 +140,7 @@ module.exports = {
                         }
                       });
                     });
+                    logEmbed.addFields({name: `new team co-captain`, value: newCoCaptainUsername})
                 } catch (error) {
                     console.error("error trying to update the new team co-captain: ", error);
                     coCaptainUpdated = 'something went wrong while updating the team co-captain';
@@ -143,57 +149,55 @@ module.exports = {
         }
 
         if(interaction.options.getString('new_team_name')) {
+            const newTeamName = interaction.options.getString('new_team_name');
             if(newTeamName !== teamName){
                 try {
                     await new Promise((resolve, reject) => {
-                      
-                        let sql = `UPDATE Teams 
-                                  SET team_name = ?
-                                  WHERE team_name = ? AND game_name = ?`;
-                  
-                        db.run(sql, [newTeamName, teamName, gameName], function(err) {
-                            if (err) {
-                                reject(`There was an error updating the team: ${teamName} ${err.message}`);
-                            } else {
-                                resolve(
-                                    updated += 1
-                                );
-                            }
+                        db.serialize(() => {
+                            db.run("BEGIN TRANSACTION");
+                    
+                            let sql1 = `UPDATE Teams SET team_name = ? WHERE team_name = ? AND game_name = ?`;
+                            db.run(sql1, [newTeamName, teamName, gameName], function(err) {
+                                if (err) {
+                                    return db.run("ROLLBACK", () => {
+                                        reject(`There was an error updating the team: ${teamName} ${err.message}`);
+                                    });
+                                }
+                            });
+                    
+                            let sql2 = `UPDATE availability SET team_name = ? WHERE team_name = ? AND game_name = ?`;
+                            db.run(sql2, [newTeamName, teamName, gameName], function(err) {
+                                if (err) {
+                                    return db.run("ROLLBACK", () => {
+                                        reject(`There was an error updating the team: ${teamName} ${err.message}`);
+                                    });
+                                }
+                            });
+                    
+                            let sql3 = `UPDATE messages SET team_name = ? WHERE team_name = ? AND game_name = ?`;
+                            db.run(sql3, [newTeamName, teamName, gameName], function(err) {
+                                if (err) {
+                                    return db.run("ROLLBACK", () => {
+                                        reject(`There was an error updating the team: ${teamName} ${err.message}`);
+                                    });
+                                }
+                            });
+                    
+                            db.run("COMMIT", function(err) {
+                                if (err) {
+                                    return db.run("ROLLBACK", () => {
+                                        reject(`There was an error committing the transaction: ${err.message}`);
+                                    });
+                                }
+                                resolve(updated += 1);
+                            });
                         });
                     });
+                    
 
-                    await new Promise((resolve, reject) => {
-                        let sql = `UPDATE availability
-                                    SET team_name = ?
-                                    WHERE team_name = ? AND game_name = ?`;
-                        
-                        db.run(sql, [newTeamName, teamName, gameName], function(err) {
-                            if (err) {
-                                reject(`There was an error updating the team: ${teamName} ${err.message}`);
-                            } else {
-                                resolve(
-                                    updated += 1
-                                );
-                            }
-                        });
-                    });
-
-                    await new Promise((resolve, reject) => {
-                        let sql = `UPDATE messages
-                                    SET team_name = ?
-                                    WHERE team_name = ? AND game_name = ?`;
-                        
-                        db.run(sql, [newTeamName, teamName, gameName], function(err) {
-                            if (err) {
-                                reject(`There was an error updating the team: ${teamName} ${err.message}`);
-                            } else {
-                                resolve(
-                                    updated += 1
-                                );
-                            }
-                        });
-                    });
-
+                    const teamsJson = JSON.parse(fs.readFileSync('teams.json', 'utf8'));
+                    const { teams, "games per team name": gamesPerTeamName } = teamsJson;
+                    
                     if (gamesPerTeamName[teamName] <= 1) {
                         delete gamesPerTeamName[teamName];
                         teamsJson.teams = teams.filter(team => team.name !== teamName);
@@ -211,6 +215,8 @@ module.exports = {
                     fs.writeFileSync('teams.json', JSON.stringify(teamsJson, null, 2));
 
                     teamNameUpdated = `updated the team name to ${newTeamName}`
+
+                    logEmbed.addFields({name: `new team name`, value: newTeamName})
                 } catch (error) {
                     console.error("error trying to update the new team name: ", error);
                     teamNameUpdated += '\nsomething went wrong while updating the team name';
@@ -225,7 +231,7 @@ module.exports = {
             coCaptainUpdated = "";
         }
         if (!teamNameUpdated){
-            teamNameUpdated = '';
+            teamNameUpdated = "";
         }
 
         if(updated > 0) {
@@ -237,7 +243,7 @@ module.exports = {
                 } catch(error){
                     console.log(error)
                     await interaction.editReply({
-                    content: `${teamNameUpdated}, \n${captainUpdated}, \n${coCaptainUpdated}.\n❌❌❌ But there was an error reloading the commands, please contact <a7a_.>.`,
+                    content: `${teamNameUpdated} \n${captainUpdated} \n${coCaptainUpdated}.\n❌❌❌ But there was an error reloading the commands, please contact <a7a_.>.`,
                     ephemeral: true 
                 });
                 return;
@@ -247,11 +253,14 @@ module.exports = {
                 content: `${teamNameUpdated} \n${captainUpdated} \n${coCaptainUpdated}`,
                 ephemeral: true
             });
+            return await sendLog(client, logEmbed)
         } else {
             await interaction.editReply({
                 content: "nothing to update here, if this is a mistake please contact <a7a_.>.",
                 ephemeral: true
             });
+            logEmbed.addFields({name: "nothing updated", value: ""})
+            return await sendLog(client, logEmbed)
         }     
     }
 }                

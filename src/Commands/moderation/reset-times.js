@@ -1,14 +1,15 @@
-const { SlashCommandBuilder, ChannelType, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, ChannelType, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const gameChoices = JSON.parse(fs.readFileSync('games.json', 'utf8'));
 const { getDbInfo } = require('../../Functions/get-info-from-db');
-const { checkIfTeamHasAvailability } = require('../../Functions/db-checks')
-const { deleteTeamAvailability } = require('../../Functions/delete-team-availability')
-const { getTeamByGuild } = require('../../Functions/get-team-by-guild')
-const { sendMessageAndStoreId } = require('../../Functions/send-times-message')
-const { deleteTeamMessages } = require('../../Functions/delete-team-message')
-const { deleteAllTeamTimesMessages } = require('../../Functions/delete-times-messages')
+const { checkIfTeamHasAvailability } = require('../../Functions/db-checks');
+const { deleteTeamAvailability } = require('../../Functions/delete-team-availability');
+const { getTeamByGuild } = require('../../Functions/get-team-by-guild');
+const { sendMessageAndStoreId } = require('../../Functions/send-times-message');
+const { deleteTeamMessages } = require('../../Functions/delete-team-message');
+const { deleteAllTeamTimesMessages } = require('../../Functions/delete-times-messages');
+const { sendLog } = require('../../Functions/bot-log-message')
 const db = new sqlite3.Database('info.db', (err) => {
     if (err) {
       console.error('Error opening database:', err.message);
@@ -86,12 +87,8 @@ module.exports = {
             content: 'processing...',
             ephemeral: true
         })
-        const timezone = interaction.options.getString('timezone');
         const gameName = interaction.options.getString('game_name');
-        const eventsChannel = interaction.options.getChannel('channel');
-        const eventsChannelId = eventsChannel.id;
         const callerGuildId = interaction.guild.id.toString();
-        const callerId = interaction.user.id.toString();
         const { teamName } = await getTeamByGuild(callerGuildId, gameName);
 
         try {
@@ -109,6 +106,7 @@ module.exports = {
             return;
         }
 
+        const callerId = interaction.user.id.toString();
         if (callerId !== captainId && callerId !== coCaptainId) {
             await interaction.editReply({
                 content: "you need to be the team captain or co captain to reset the times!",
@@ -129,10 +127,13 @@ module.exports = {
         const botPermissions = eventsChannel.permissionsFor(Client.user);
         const requiredPermissions = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages | PermissionFlagsBits.AddReactions;
 
+        const eventsChannel = interaction.options.getChannel('channel');
+        
         if (!botPermissions.has(requiredPermissions)) {
             return interaction.editReply(`I do not have the required permissions (View, Send, React) in the channel: ${eventsChannel.name}`);
-        }
+        };
 
+        const eventsChannelId = eventsChannel.id;
         const daysArray = [];
 
         if (interaction.options.getBoolean('monday')) daysArray.push('monday');
@@ -150,7 +151,7 @@ module.exports = {
                 ephemeral: true
             });
             return; // Exit the command execution if no days were chosen
-        }
+        };
         
         try{
             await deleteAllTeamTimesMessages(gameName, teamName, Client)
@@ -164,8 +165,11 @@ module.exports = {
             })
             return;
         }
+        const logEmbed = new EmbedBuilder()
+            .setDescription(`team ${teamName} for game ${gameName}, has reset their times`)
+            .setColor('##0786eb');
 
-
+        const timezone = interaction.options.getString('timezone');
         const updateQuery = `
             UPDATE teams 
             SET
@@ -324,5 +328,13 @@ module.exports = {
             content:`Successfully reset to the following days:\n${daysArray.join(", ")}\n\nAnd times:\n${timesArray.join(", ")}\n\nand timezone set to ${timezone}, for team ${teamName}`,
             ephemeral: true
         });
+
+        logEmbed
+            .addFields({name: 'events channel:', value: eventsChannel.name})
+            .addFields({name: 'days:', value: daysArray.join(", ")})
+            .addFields({name: 'hours:', value: timesArray.join(", ")})
+            .addFields({name: 'timezone:', value: timezone});
+
+        return await sendLog(Client, logEmbed);
     }
 };

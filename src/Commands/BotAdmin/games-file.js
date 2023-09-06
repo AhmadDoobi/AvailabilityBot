@@ -1,5 +1,6 @@
-const { SlashCommandBuilder, PermissionFlagsBits} = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder} = require('discord.js');
 const fs = require('fs');
+const { sendLog } = require('../../Functions/bot-log-message.js');
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
 const { addGame, deleteGame } = require('../../Handlers/games-file-options.js');
@@ -43,17 +44,23 @@ module.exports = {
                 await interaction.editReply({
                     content: state,
                     ephemeral: true
-                })          
+                });
+                const logEmbed = new EmbedBuilder()
+                    .setDescription(`game ${gameName} was added to the games choices`)
+                    .setColor("#f9a825");
+                return await sendLog(client, logEmbed)
             }
-            break;
-
             case 'delete_game': {
                 const state = await deleteGame(gameName, client);
                 await interaction.editReply({
                     content: state,
                     ephemeral: true
-                });     
-                return;
+                });
+
+                const logEmbed = new EmbedBuilder()
+                    .setDescription(`game ${gameName} was deleted from the games choices`)
+                    .setColor("#f57f17");         
+                return await sendLog(client, logEmbed);
             }
             
         }

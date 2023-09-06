@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 let teamsJson = JSON.parse(fs.readFileSync('teams.json', 'utf8'));
@@ -7,6 +7,7 @@ const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
 const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-teams-games-commands");
 const { checkIfTeamAlreadyExists, checkIfGuildHasTeamForGame } = require('../../Functions/db-checks');
+const { sendLog } = require('../../Functions/bot-log-message')
 
 const db = new sqlite3.Database('info.db', (err) => {
   if (err) {
@@ -64,6 +65,10 @@ module.exports = {
         const coCaptainUsername = coCaptainUser.username;
         // Get the guild id 
         const guildId = interaction.guild.id;
+
+        const logEmbed = new EmbedBuilder()
+          .setColor('#082d06')
+          .setDescription(`New team registered for game: ${gameName}`);
 
         const teamExistsOnAnotherServer = await checkIfTeamAlreadyExists(gameName, teamName, guildId);
         if (teamExistsOnAnotherServer) {
@@ -130,6 +135,27 @@ module.exports = {
           content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".`, 
           ephemeral: true
         });
+
+        logEmbed.addFields(
+          {
+            name: "Team name",
+            value: teamName
+          },
+          {
+            name: "captain username",
+            value: captainUsername
+          },          
+          {
+            name: "co-captain username",
+            value: coCaptainUsername
+          },
+          {
+            name: "server name",
+            value: interaction.guild.name
+          },
+        )
+
+        return await sendLog(client, logEmbed);
     },
 };
 

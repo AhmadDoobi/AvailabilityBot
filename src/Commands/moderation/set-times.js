@@ -1,11 +1,12 @@
-const { SlashCommandBuilder, ChannelType, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, ChannelType, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const gameChoices = JSON.parse(fs.readFileSync('games.json', 'utf8'));
 const { getDbInfo } = require('../../Functions/get-info-from-db');
-const { checkIfTeamHasAvailability } = require('../../Functions/db-checks')
-const {  getTeamByGuild } = require('../../Functions/get-team-by-guild')
-const { sendMessageAndStoreId } = require('../../Functions/send-times-message')
+const { checkIfTeamHasAvailability } = require('../../Functions/db-checks');
+const {  getTeamByGuild } = require('../../Functions/get-team-by-guild');
+const { sendMessageAndStoreId } = require('../../Functions/send-times-message');
+const { sendLog } = require('../../Functions/bot-log-message');
 const db = new sqlite3.Database('info.db', (err) => {
     if (err) {
       console.error('Error opening database:', err.message);
@@ -146,6 +147,10 @@ module.exports = {
             return; // Exit the command execution if no days were chosen
         }
 
+        const logEmbed = new EmbedBuilder()
+            .setDescription(`team ${teamName} for game ${gameName} has set their times!`)
+            .setColor('#2196f3');
+            
         const updateQuery = `
             UPDATE teams 
             SET
@@ -156,6 +161,7 @@ module.exports = {
         if(interaction.options.getRole('team_members_role')){
             const teamMemberRoleId = interaction.options.getRole('team_members_role').id;
             const role = interaction.options.getRole('team_members_role')
+            logEmbed.addFields({name: `teammember role:`, value: role.name});
             let rolePingMessageId = "";
             if (role.mentionable) {
                 const rolePingMessage = await eventsChannel.send(`Hey ${role}, please react to the times you're available in the messages below for game ${gameName}`);
@@ -281,6 +287,7 @@ module.exports = {
                     });
                 });
             }
+
             const messageId = await sendMessageAndStoreId(eventsChannel, day, timesArray)
             let insertQuery = `
             INSERT INTO messages (
@@ -305,5 +312,12 @@ module.exports = {
             content:`Successfully set the following days:\n${daysArray.join(", ")}\n\nAnd times:\n${timesArray.join(", ")}.\n\ntimezone was set to ${timezone}. for team ${teamName}`,
             ephemeral: true
         });
+        logEmbed
+            .addFields({name: 'events channel:', value: eventsChannel.name})
+            .addFields({name: 'days:', value: daysArray.join(", ")})
+            .addFields({name: 'hours:', value: timesArray.join(", ")})
+            .addFields({name: 'timezone:', value: timezone});
+            
+        return await sendLog(client, logEmbed)
     }
 };
