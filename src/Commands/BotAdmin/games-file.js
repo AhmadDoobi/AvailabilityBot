@@ -48,7 +48,8 @@ module.exports = {
                 const logEmbed = new EmbedBuilder()
                     .setDescription(`game ${gameName} was added to the games choices`)
                     .setColor("#f9a825");
-                return await sendLog(client, logEmbed)
+                await sendLog(client, logEmbed);
+                return;
             }
             case 'delete_game': {
                 const state = await deleteGame(gameName, client);
