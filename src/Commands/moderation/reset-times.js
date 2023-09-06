@@ -123,12 +123,9 @@ module.exports = {
             });
             return;
         }
-
+        const eventsChannel = interaction.options.getChannel('channel');
         const botPermissions = eventsChannel.permissionsFor(Client.user);
         const requiredPermissions = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages | PermissionFlagsBits.AddReactions;
-
-        const eventsChannel = interaction.options.getChannel('channel');
-        
         if (!botPermissions.has(requiredPermissions)) {
             return interaction.editReply(`I do not have the required permissions (View, Send, React) in the channel: ${eventsChannel.name}`);
         };
@@ -335,6 +332,8 @@ module.exports = {
             .addFields({name: 'hours:', value: timesArray.join(", ")})
             .addFields({name: 'timezone:', value: timezone});
 
-        return await sendLog(Client, logEmbed);
+        await sendLog(Client, logEmbed);
+
+        return;
     }
 };
