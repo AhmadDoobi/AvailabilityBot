@@ -164,7 +164,7 @@ module.exports = {
         }
         const logEmbed = new EmbedBuilder()
             .setDescription(`team ${teamName} for game ${gameName}, has reset their times`)
-            .setColor('##0786eb');
+            .setColor('#0786eb');
 
         const timezone = interaction.options.getString('timezone');
         const updateQuery = `
