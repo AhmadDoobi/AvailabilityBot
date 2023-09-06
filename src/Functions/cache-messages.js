@@ -133,6 +133,7 @@ async function cacheMessages(client) {
       );
     });
   }
+  return;        
 }
 
 module.exports = { cacheMessages };

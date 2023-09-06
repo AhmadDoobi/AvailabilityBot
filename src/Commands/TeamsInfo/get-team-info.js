@@ -47,7 +47,7 @@ module.exports = {
                 ephemeral: true 
             });
             console.log(error);
-            return
+            return;        
         }
     }
 }

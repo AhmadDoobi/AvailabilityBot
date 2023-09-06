@@ -98,6 +98,7 @@ async function deleteTimesMessages(gameName, teamName, day, client) {
         // Delete the message
         await message.delete();
 
+        return;        
     } catch{}
 }
 

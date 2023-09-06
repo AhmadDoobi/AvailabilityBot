@@ -317,7 +317,8 @@ module.exports = {
             .addFields({name: 'days:', value: daysArray.join(", ")})
             .addFields({name: 'hours:', value: timesArray.join(", ")})
             .addFields({name: 'timezone:', value: timezone});
-            
-        return await sendLog(client, logEmbed)
+
+        await sendLog(client, logEmbed);
+        return;
     }
 };

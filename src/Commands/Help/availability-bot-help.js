@@ -1,5 +1,5 @@
-const { SlashCommandBuilder } = require("discord.js")
-const { helpEmbed } = require('../../Embeds/availability-bot-help-embed')
+const { SlashCommandBuilder } = require("discord.js");
+const { helpEmbed } = require('../../Embeds/availability-bot-help-embed');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,5 +9,6 @@ module.exports = {
     async execute(interaction) {
         const embed = await helpEmbed();
         await interaction.reply({ embeds: [embed] });
+        return;
     }
 }

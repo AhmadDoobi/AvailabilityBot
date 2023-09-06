@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits} = require('discord.js');
-const { loadCommands } = require('../../Handlers/command-handler')
-const { reloadTeamsAndGamesCommands } = require('../../Handlers/reload-teams-games-commands')
+const { loadCommands } = require('../../Handlers/command-handler');
+const { reloadTeamsAndGamesCommands } = require('../../Handlers/reload-teams-games-commands');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('reload-commands')
@@ -33,9 +33,9 @@ module.exports = {
 					await interaction.editReply({
 						content: state,
 						ephemeral: true
-					})
-				}
-				return;
+					});
+					return;
+				};
 				case 'teams-commands': {
 					const insideCommand = false
 					const gamesCommands = false
@@ -43,9 +43,9 @@ module.exports = {
 					await interaction.editReply({
 						content: state,
 						ephemeral: true
-					})
-				}
-				return;
+					});
+					return;
+				};
 				case "games-commands":{
 					const insideCommand = false
 					const gamesCommands = true
@@ -53,16 +53,9 @@ module.exports = {
 					await interaction.editReply({
 						content: state,
 						ephemeral: true
-					})
-				}
-			}
-			if (subcommand === 'all-commands'){
-				const startup = false
-				const state = await loadCommands(client, startup)
-				await interaction.editReply({
-					content: state,
-					ephemeral: true
-				})
-			}
+					});
+					return;
+				};
+			};
 		}
-}
+};

@@ -155,7 +155,9 @@ module.exports = {
           },
         )
 
-        return await sendLog(client, logEmbed);
+        await sendLog(client, logEmbed);
+
+        return;
     },
 };
 

@@ -9,5 +9,6 @@ module.exports = {
     async execute(interaction, client) {
         const embed = await registeredTeamsEmbed(client);
         await interaction.reply({ embeds: [embed] });
+        return;
     }
 }

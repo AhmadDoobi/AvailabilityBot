@@ -60,7 +60,8 @@ module.exports = {
                 const logEmbed = new EmbedBuilder()
                     .setDescription(`game ${gameName} was deleted from the games choices`)
                     .setColor("#f57f17");         
-                return await sendLog(client, logEmbed);
+                await sendLog(client, logEmbed);
+                return;
             }
             
         }

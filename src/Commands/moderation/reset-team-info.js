@@ -260,7 +260,9 @@ module.exports = {
                 ephemeral: true
             });
             logEmbed.addFields({name: "nothing updated", value: ""})
-            return await sendLog(client, logEmbed)
+            await sendLog(client, logEmbed);
+            return;
+
         }     
     }
 }                

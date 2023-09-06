@@ -17,6 +17,7 @@ module.exports = {
                 content: 'Successfully cached all times messages ',
                 ephemeral: true
             })
+            return;
         } catch (error) {
             console.log(`something went wrong while caching times messages on command: ${error}`)
             await interaction.editReply({

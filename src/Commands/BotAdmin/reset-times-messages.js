@@ -21,6 +21,8 @@ module.exports = {
         const logEmbed = new EmbedBuilder()
             .setDescription('times messages were reseted manually!')
             .setColor('#ffffe9');
-        return await sendLog(client, logEmbed);
+        await sendLog(client, logEmbed);
+        
+        return;
     }
 }

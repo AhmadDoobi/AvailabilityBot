@@ -7,6 +7,7 @@ module.exports = {
         const logEmbed = new EmbedBuilder()
             .setColor('#008000')
             .setDescription(`Bot was added to server ${guild.name}`);
-        return await sendLog(client, logEmbed);
+        await sendLog(client, logEmbed);
+        return;        
     }
 }

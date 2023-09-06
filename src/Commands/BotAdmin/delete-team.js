@@ -103,6 +103,7 @@ module.exports = {
             ephemeral: true
         });
 
-        return await sendLog(client, logEmbed);
+        await sendLog(client, logEmbed);
+        return;
     }
 };

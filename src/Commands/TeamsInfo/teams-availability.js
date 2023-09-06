@@ -73,14 +73,15 @@ module.exports = {
                 const amountOfPlayers = interaction.options.getInteger('amount_of_players');
                 const embed = await teamsAvailabilityEmbed(gameName, amountOfPlayers);
                 await interaction.reply({ embeds: [embed] });
-            }
-            return;
+                return;        
 
+            }
             case 'specific-team': {
                 const teamName = interaction.options.getString('team_name');
                 const day = interaction.options.getString('day');
                 const embed = await specificTeamAvailabilityEmbed(gameName, teamName, day);
                 await interaction.reply({ embeds: [embed] });
+                return;        
             }
         }
 

@@ -11,6 +11,7 @@ module.exports = {
         const logEmbed = new EmbedBuilder()
             .setColor('#ADD8E6')
             .setDescription(`server: ${oldGuild.name} name was updated to ${newGuild.name}`);
-        return await sendLog(client, logEmbed);
+        await sendLog(client, logEmbed);
+        return;        
     }
 }

@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js')
+const { EmbedBuilder } = require('discord.js');
 const { loadCommands } = require("../../Handlers/command-handler");
 const { cacheMessages } = require('../../Functions/cache-messages');
 const { sendLog } = require('../../Functions/bot-log-message');
@@ -13,6 +13,7 @@ module.exports = {
 		const logEmbed = new EmbedBuilder()
 			.setDescription('The bot just came online')
 			.setColor('#c5e1a5')
-		return await sendLog(client, logEmbed)
+		await sendLog(client, logEmbed);
+		return;        
 	},
 };

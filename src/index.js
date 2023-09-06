@@ -45,10 +45,12 @@ rl.on('line', async (input) => {
         .setDescription('Times messages have been reset!')
         .addFields({name: 'time took for reseting', value: `${timeTaken}s`});
 
-      return await sendLog(client, logEmbed)
+      await sendLog(client, logEmbed)
+      return;        
     } catch (error) {
       logEmbed.setDescription('An error occurred while resetting times messages: ', error);
-      return await sendLog(client, logEmbed);
+      await sendLog(client, logEmbed);
+      return;        
     }
   }
 });
