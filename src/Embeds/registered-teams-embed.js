@@ -14,7 +14,7 @@ const db = new sqlite3.Database("info.db", (err) => {
 
 async function registeredTeamsEmbed(client) {
   const embed = new EmbedBuilder()
-    .setTitle("AvailabilityBot registired teams")
+    .setTitle("AvailabilityBot registered teams")
     .setDescription(
       "this is a list of all the registered teams in the bot data base"
     )
