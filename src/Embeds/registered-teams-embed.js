@@ -18,7 +18,7 @@ async function registeredTeamsEmbed(client) {
     .setDescription(
       "this is a list of all the registered teams in the bot data base"
     )
-
+    .setColor('#c8c9b4')
     .setURL(adminGuildUrl)
 
     .setAuthor({
