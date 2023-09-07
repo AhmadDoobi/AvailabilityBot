@@ -12,11 +12,18 @@ async function botGuildsEmbed(client) {
         .setURL(adminGuildUrl)
         .setTimestamp()
         .setFooter({text: 'made by "a7a_." ', iconURL: botOwnerImage})
-        .setColor('#a0a090');
+        .setColor('#a0a090')
+        .setDescription('this is a list of the servers the bot is in');
 
     const guilds = client.guilds.cache;
     guilds.forEach(guild => {
-        embed.addFields({ name: guild.name, value: '\u200b' });
+        embed.addFields(
+            { 
+                name: guild.name, value: '\u200b' 
+            },
+            { 
+                name: '-------------------------------------', value: '\u200b' 
+            });
     });
 
     return embed;
