@@ -1,15 +1,16 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('info.db', (err) => {
-  if (err) {
-    console.error('Error opening database:', err.message);
-  }
-});
 const { sendMessageAndStoreId } = require('./send-times-message');
 const { deleteTimesMessages } = require('./delete-times-messages');
 const { resetAvailablePlayers } = require('./reset-available-players');
 const { PermissionFlagsBits } = require('discord.js');
 
 async function scheduleMessagesForTeams(client) {
+  const db = new sqlite3.Database('info.db', (err) => {
+    if (err) {
+      console.error('Error opening database:', err.message);
+    }
+  });
+  
   const teamsAndGames = await new Promise((resolve, reject) => {
     db.all("SELECT team_name, game_name, teamMember_roleId, events_channelId, captain_userId FROM teams", (err, rows) => {
       if (err) reject(err);
@@ -111,6 +112,13 @@ async function scheduleMessagesForTeams(client) {
       );
     });
   }
+
+  db.close((err) => {
+    if (err) {
+        console.error('Error closing the database:', err.message);
+    }
+  }); 
+
   return;
 }
 

@@ -1,11 +1,12 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('info.db', (err) => {
+
+async function deleteTeamMessages(gameName, teamName){
+  const db = new sqlite3.Database('info.db', (err) => {
     if (err) {
       console.error('Error opening database:', err.message);
     }
-});
+  });
 
-async function deleteTeamMessages(gameName, teamName){
     let deleteQuery = `DELETE FROM messages WHERE team_name = ? AND game_name = ?`;
     let state;
     try {
@@ -23,6 +24,14 @@ async function deleteTeamMessages(gameName, teamName){
         state = 'something went wrong while deleting team messages.'
         console.error(`Error occurred: ${err}`);
     }
+
+
+    db.close((err) => {
+      if (err) {
+          console.error('Error closing the database:', err.message);
+      }
+    });
+
     return state
 }
 

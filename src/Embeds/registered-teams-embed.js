@@ -4,15 +4,15 @@ dotenv.config();
 const adminGuildUrl = process.env.ADMIN_GUILD_URL;
 const botImage = process.env.BOT_IMAGE_URL;
 const botOwnerImage = process.env.BOT_OWNER_IMAGE;
-
 const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database("info.db", (err) => {
-  if (err) {
-    console.error("Error opening database:", err.message);
-  }
-});
 
 async function registeredTeamsEmbed(client) {
+  const db = new sqlite3.Database("info.db", (err) => {
+    if (err) {
+      console.error("Error opening database:", err.message);
+    } 
+  });
+
   const embed = new EmbedBuilder()
     .setTitle("AvailabilityBot registered teams")
     .setDescription(
@@ -83,6 +83,13 @@ async function registeredTeamsEmbed(client) {
   } catch (err) {
     console.error(err);
   }
+  
+  db.close((err) => {
+    if (err) {
+      console.error('Error closing the database:', err.message);
+    }
+  });
+
   return embed;
 }
 
