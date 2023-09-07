@@ -10,11 +10,6 @@ const { sendMessageAndStoreId } = require('../../Functions/send-times-message');
 const { deleteTeamMessages } = require('../../Functions/delete-team-message');
 const { deleteAllTeamTimesMessages } = require('../../Functions/delete-times-messages');
 const { sendLog } = require('../../Functions/bot-log-message')
-const db = new sqlite3.Database('info.db', (err) => {
-    if (err) {
-      console.error('Error opening database:', err.message);
-    }
-});
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -86,7 +81,14 @@ module.exports = {
         await interaction.reply({
             content: 'processing...',
             ephemeral: true
-        })
+        });
+
+        const db = new sqlite3.Database('info.db', (err) => {
+            if (err) {
+              console.error('Error opening database:', err.message);
+            }
+        });
+
         const gameName = interaction.options.getString('game_name');
         const callerGuildId = interaction.guild.id.toString();
         const { teamName } = await getTeamByGuild(callerGuildId, gameName);
@@ -334,6 +336,12 @@ module.exports = {
 
         await sendLog(Client, logEmbed);
 
+        db.close((err) => {
+            if (err) {
+                console.error('Error closing the database:', err.message);
+            }
+        });
+        
         return;
     }
 };

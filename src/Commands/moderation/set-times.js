@@ -7,11 +7,6 @@ const { checkIfTeamHasAvailability } = require('../../Functions/db-checks');
 const {  getTeamByGuild } = require('../../Functions/get-team-by-guild');
 const { sendMessageAndStoreId } = require('../../Functions/send-times-message');
 const { sendLog } = require('../../Functions/bot-log-message');
-const db = new sqlite3.Database('info.db', (err) => {
-    if (err) {
-      console.error('Error opening database:', err.message);
-    }
-});
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -83,7 +78,13 @@ module.exports = {
         await interaction.reply({
             content: 'processing...',
             ephemeral: true
-        })
+        });
+
+        const db = new sqlite3.Database('info.db', (err) => {
+            if (err) {
+              console.error('Error opening database:', err.message);
+            }
+        });
 
         const timezone = interaction.options.getString('timezone');
         const gameName = interaction.options.getString('game_name');
@@ -319,6 +320,13 @@ module.exports = {
             .addFields({name: 'timezone:', value: timezone});
 
         await sendLog(client, logEmbed);
+
+        db.close((err) => {
+            if (err) {
+                console.error('Error closing the database:', err.message);
+            }
+        });
+        
         return;
     }
 };

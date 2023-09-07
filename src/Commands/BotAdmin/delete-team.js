@@ -5,11 +5,6 @@ let teams = teamsJson.teams;
 const games = fs.readFileSync('games.json', 'utf8');
 const gameChoices = JSON.parse(games);
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('info.db', (err) => {
-    if (err) {
-      console.error('Error opening database:', err.message);
-    }
-});
 const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-teams-games-commands");
 const { deleteTeamAvailability } = require('../../Functions/delete-team-availability');
 const { deleteTeamMessages } = require('../../Functions/delete-team-message');
@@ -38,7 +33,13 @@ module.exports = {
         await interaction.reply({
             content: 'processing...',
             ephemeral: true
-        })
+        });
+
+        const db = new sqlite3.Database('info.db', (err) => {
+            if (err) {
+              console.error('Error opening database:', err.message);
+            }
+        });
 
         const gameName = interaction.options.getString('game_name');
         const teamName = interaction.options.getString('team_name');
@@ -104,6 +105,13 @@ module.exports = {
         });
 
         await sendLog(client, logEmbed);
+
+        db.close((err) => {
+            if (err) {
+                console.error('Error closing the database:', err.message);
+            }
+        });
+        
         return;
     }
 };

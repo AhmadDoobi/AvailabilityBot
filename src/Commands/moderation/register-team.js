@@ -9,12 +9,6 @@ const { reloadTeamsAndGamesCommands } = require("../../Handlers/reload-teams-gam
 const { checkIfTeamAlreadyExists, checkIfGuildHasTeamForGame } = require('../../Functions/db-checks');
 const { sendLog } = require('../../Functions/bot-log-message')
 
-const db = new sqlite3.Database('info.db', (err) => {
-  if (err) {
-    console.error('Error opening database:', err.message);
-  }
-});
-
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('register-team')
@@ -46,7 +40,14 @@ module.exports = {
         await interaction.reply({
           content: 'processing...',
           ephemeral: true
-        })
+        });
+
+        const db = new sqlite3.Database('info.db', (err) => {
+          if (err) {
+            console.error('Error opening database:', err.message);
+          }
+        });
+
         // Get the game name 
         const gameName = interaction.options.getString('game_name');
         // Get the team name 
@@ -156,7 +157,13 @@ module.exports = {
         )
 
         await sendLog(client, logEmbed);
-
+        
+        db.close((err) => {
+          if (err) {
+              console.error('Error closing the database:', err.message);
+          }
+        });
+        
         return;
     },
 };
