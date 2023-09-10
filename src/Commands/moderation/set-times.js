@@ -106,7 +106,7 @@ module.exports = {
              await interaction.editReply({
                 content: "you didn't register your team yet. \nuse /register-team. \nif this is a mistake please contact <a7a_.>"
             });
-                eturn;
+                return;
         }
 
         teamGuildId = teamInfo.guildId;
