@@ -49,6 +49,13 @@ module.exports = {
         const gameName = interaction.options.getString('game_name');
         const callerGuildId = interaction.guild.id.toString();
         const { teamName } = await getTeamByGuild(callerGuildId, gameName);
+        if (!teamName){
+            await interaction.editReply({
+                content: "Sorry, we couldn't find a registered team for your server in the chosen game.",
+                ephemeral: true
+            })
+            return;
+        };
         const callerId = interaction.user.id.toString();
         let captainId;
         let coCaptainId;
