@@ -26,6 +26,21 @@ module.exports = {
                 .setName('team_name')
                 .setDescription('type the full team name')
                 .setRequired(true))
+        .addStringOption(option =>
+          option
+              .setName('timezone')
+              .setDescription('select the timezone for your team')
+              .setRequired(true)
+              .addChoices(
+                {name: 'bst', value: 'bst'},
+                {name: 'est', value: 'est'},
+                {name: 'gmt', value: 'gmt'},
+                {name: 'pst', value: 'pst'},
+                {name: 'edt', value: 'edt'},
+                {name: 'pdt', value: 'pdt'},
+                {name: 'cest', value: 'cest'},
+                {name: 'cet', value: 'cet'},
+              )) 
         .addUserOption(option =>
             option
                 .setName('captain')
@@ -66,6 +81,8 @@ module.exports = {
         const coCaptainUsername = coCaptainUser.username;
         // Get the guild id 
         const guildId = interaction.guild.id;
+        // Get the timezone
+        const timezone = interaction.options.getString('timezone');
 
         const logEmbed = new EmbedBuilder()
           .setColor('#082d06')
@@ -110,7 +127,7 @@ module.exports = {
 
         try {
           await new Promise((resolve, reject) => {
-              db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername, 'not set', 'not set', 'not set'], function(err) {
+              db.run(insertQuery, [guildId, gameName, teamName, captainUserId, coCaptainUserId, captainUsername, coCaptainUsername, 'not set', 'not set', timezone], function(err) {
                   if (err) {
                       console.error('Error inserting team:', err.message);
                       reject(err);
@@ -133,7 +150,7 @@ module.exports = {
         await reloadTeamsAndGamesCommands(client, insideCommand, gamesCommands)           
 
         await interaction.editReply({
-          content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nand the co-captain username was set to "${coCaptainUsername}".`, 
+          content: `The game name has been set to "${gameName}",\nteam name set to "${teamName}",\ncaptain username set to "${captainUsername}",\nco-captain username was set to "${coCaptainUsername}",\nand the timezone was set to "${timezone}".`, 
           ephemeral: true
         });
 
@@ -149,6 +166,10 @@ module.exports = {
           {
             name: "co-captain username",
             value: coCaptainUsername
+          },
+          {
+            name: "timezone",
+            value: timezone
           },
           {
             name: "server name",
