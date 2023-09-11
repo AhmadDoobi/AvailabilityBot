@@ -59,19 +59,7 @@ module.exports = {
                 .addChoices(
                     {name: '6pm', value: 6}, {name: '7pm', value: 7}, {name: '8pm', value: 8}, {name: '9pm', value: 9},
                     {name: '10pm', value: 10}, {name: '11pm', value: 11}
-                ))
-        .addStringOption(option =>
-            option
-                .setName('timezone')
-                .setDescription('select the timezone for your team')
-                .setRequired(true)
-                .addChoices(
-                    {name: 'bst', value: 'bst'},
-                    {name: 'est', value: 'est'},
-                    {name: 'gmt', value: 'gmt'},
-                    {name: 'pst', value: 'pst'},
-                    {name: 'cet', value: 'cet'},
-                ))    
+                ))   
         .addRoleOption(option =>
             option
                 .setName('team_members_role')
@@ -175,11 +163,10 @@ module.exports = {
             .setDescription(`team ${teamName} for game ${gameName}, has reset their times`)
             .setColor('#0786eb');
 
-        const timezone = interaction.options.getString('timezone');
         const updateQuery = `
             UPDATE teams 
             SET
-                events_channelId = ?, teamMember_roleId = ?, time_zone = ?
+                events_channelId = ?, teamMember_roleId = ?
             WHERE 
                 game_name = ? AND team_name = ?;
             `;
@@ -214,7 +201,7 @@ module.exports = {
             });
             try {
                 await new Promise((resolve, reject) => {
-                    db.run(updateQuery, [eventsChannelId, teamMemberRoleId, timezone, gameName, teamName], function(err) {
+                    db.run(updateQuery, [eventsChannelId, teamMemberRoleId, gameName, teamName], function(err) {
                     if (err) {
                         console.error('Error inserting team:', err.message);
                         reject(err);
@@ -240,7 +227,7 @@ module.exports = {
                 rolePingMessageId = rolePingMessage.id
                 console.log(rolePingMessageId)
                 await new Promise((resolve, reject) => {
-                    db.run(updateQuery, [eventsChannelId, teamMemberRoleId, timezone, gameName, teamName], function(err) {
+                    db.run(updateQuery, [eventsChannelId, teamMemberRoleId, gameName, teamName], function(err) {
                     if (err) {
                         console.error('Error inserting team:', err.message);
                         reject(err);
@@ -331,7 +318,7 @@ module.exports = {
             });
         }
         await interaction.editReply({
-            content:`Successfully reset to the following days:\n${daysArray.join(", ")}\n\nAnd times:\n${timesArray.join(", ")}\n\nand timezone set to ${timezone}, for team ${teamName}`,
+            content:`Successfully reset to the following days:\n${daysArray.join(", ")}\n\nAnd times:\n${timesArray.join(", ")}\n\nfor team ${teamName}`,
             ephemeral: true
         });
 
@@ -339,7 +326,6 @@ module.exports = {
             .addFields({name: 'events channel:', value: eventsChannel.name})
             .addFields({name: 'days:', value: daysArray.join(", ")})
             .addFields({name: 'hours:', value: timesArray.join(", ")})
-            .addFields({name: 'timezone:', value: timezone});
 
         await sendLog(Client, logEmbed);
 
