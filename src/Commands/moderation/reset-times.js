@@ -58,7 +58,7 @@ module.exports = {
                 .setRequired(true)
                 .addChoices(
                     {name: '6pm', value: 6}, {name: '7pm', value: 7}, {name: '8pm', value: 8}, {name: '9pm', value: 9},
-                    {name: '10pm', value: 10}, {name: '11pm', value: 11}, {name: '12pm', value: 12}
+                    {name: '10pm', value: 10}, {name: '11pm', value: 11}
                 ))
         .addStringOption(option =>
             option
