@@ -1,17 +1,28 @@
 {
   "name": "availabilitybot",
   "version": "1.0.0",
-  "description": "A discord bot to help team captains figure out other teams availability to setup scrims and matches.",
+  "description": "a bot to help team captains set up scrims and games",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AhmadDoobi/AvailabilityBot.git"
+  },
+  "keywords": [
+    "discord",
+    "bot"
+  ],
   "author": "a7a_.",
-  "license": "ISC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AhmadDoobi/AvailabilityBot/issues"
+  },
+  "homepage": "https://github.com/AhmadDoobi/AvailabilityBot#readme",
   "dependencies": {
     "ascii-table": "^0.0.9",
-    "discord.js": "^14.12.1",
+    "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
     "sqlite3": "^5.1.6"
   }
