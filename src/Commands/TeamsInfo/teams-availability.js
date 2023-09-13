@@ -77,9 +77,10 @@ module.exports = {
 
             }
             case 'specific-team': {
+                const callerGuildId = interaction.guild.id.toString();
                 const teamName = interaction.options.getString('team_name');
                 const day = interaction.options.getString('day');
-                const embed = await specificTeamAvailabilityEmbed(gameName, teamName, day);
+                const embed = await specificTeamAvailabilityEmbed(gameName, teamName, day, callerGuildId);
                 await interaction.reply({ embeds: [embed] });
                 return;        
             }
