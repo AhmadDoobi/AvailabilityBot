@@ -24,7 +24,6 @@ async function reactionAddHandler(reaction, user) {
         '9️⃣': 9,
         '🔟': 10,
         '🕚': 11,
-        '🕛': 12,
     };
     
     // Query the SQLite3 database to see if the message ID exists
