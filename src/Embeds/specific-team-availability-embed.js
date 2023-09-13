@@ -53,7 +53,7 @@ async function specificTeamAvailabilityEmbed(gameName, teamName, day, callerGuil
 
   const callerTimezone = await getCallerTimeZone(gameName, callerGuildId);
   if (!callerTimezone || callerTimezone === 'not set'){
-    embed.setDescription('you have to register your team before being able to uss this comamnd');
+    embed.setDescription('you have to register your team before being able to use this comamnd');
     return embed;
   }
 
