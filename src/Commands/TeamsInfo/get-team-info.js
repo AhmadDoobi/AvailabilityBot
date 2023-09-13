@@ -34,6 +34,13 @@ module.exports = {
 
         try {
             const teamInfo = await getDbInfo(gameName, teamName);
+            if (!teamInfo){
+                await interaction.editReply({
+                    content: `theres no team with the name ${teamName} for game ${gameName}`,
+                    ephemeral: true
+                })
+            }
+            
             captainUsername = teamInfo.captainUsername;
             coCaptainUsername = teamInfo.coCaptainUsername;
             teamTimezone = teamInfo.timezone
