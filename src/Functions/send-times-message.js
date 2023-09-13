@@ -11,7 +11,6 @@ async function sendMessageAndStoreId(eventsChannel, day, hours) {
       9: '9️⃣',
       10: '🔟',
       11: '🕚',
-      12: '🕛'
   };
 
   const message = await eventsChannel.send(day);
