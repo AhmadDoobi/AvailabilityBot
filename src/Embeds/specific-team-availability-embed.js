@@ -93,7 +93,7 @@ async function specificTeamAvailabilityEmbed(gameName, teamName, day, callerGuil
       };
   }
 
-  if (availableHours < 12 && availableHours > 0) {
+  if (availableHours < 11 && availableHours > 0) {
       embed.addFields(
           { name: '-------------------------------------', value: '\u200B' },
           { name: 'done', value: `no available players for the rest of the day` }
